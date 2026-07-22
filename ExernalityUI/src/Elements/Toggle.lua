@@ -17,73 +17,78 @@ function Toggle:Create(data)
 	data.Name = data.Name or "Toggle"
 	data.Callback = data.Callback or function() end
 	data.Default = data.Default or false
-	data.Description = data.Description or ""
 
 	local scheme = self.Theme:GetScheme()
+	local T = self.Theme
+	local U = self.Utility
 	self.Value = data.Default
-	self.Callback = data.Callback
 
-	local toggleFrame = Instance.new("Frame")
-	toggleFrame.Name = "Toggle_" .. data.Name
-	toggleFrame.BackgroundColor3 = scheme.ElementBackground
-	toggleFrame.BorderSizePixel = 0
-	toggleFrame.Size = UDim2.new(1, 0, 0, 36)
-	toggleFrame.Parent = self.Section.ElementContainer
+	local toggleFrame = U:Create("Frame", {
+		Name = "Toggle_" .. data.Name,
+		BackgroundColor3 = scheme.ElementBg,
+		BackgroundTransparency = scheme.ElementBgTransparency,
+		BorderSizePixel = 0,
+		Size = UDim2.new(1, -8, 0, 32),
+		Parent = self.Section.ElementContainer,
+	})
 
-	self.Utility:CreateCorner(toggleFrame)
+	U:CreateCorner(toggleFrame)
 
-	local toggleBtn = Instance.new("TextButton")
-	toggleBtn.Name = "Toggle"
-	toggleBtn.BackgroundTransparency = 1
-	toggleBtn.BorderSizePixel = 0
-	toggleBtn.Size = UDim2.new(1, 0, 1, 0)
-	toggleBtn.Text = ""
-	toggleBtn.Parent = toggleFrame
+	local nameLabel = U:Create("TextLabel", {
+		Name = "Name",
+		BackgroundTransparency = 1,
+		BorderSizePixel = 0,
+		FontFace = T.Font,
+		Text = data.Name,
+		TextColor3 = scheme.text,
+		TextSize = T.TextSize - 1,
+		TextXAlignment = Enum.TextXAlignment.Left,
+		Size = UDim2.new(0.6, -4, 1, 0),
+		Position = UDim2.new(0, 6, 0, 0),
+		Parent = toggleFrame,
+	})
 
-	local nameLabel = Instance.new("TextLabel")
-	nameLabel.Name = "Name"
-	nameLabel.BackgroundTransparency = 1
-	nameLabel.BorderSizePixel = 0
-	nameLabel.Font = self.Theme.Font
-	nameLabel.Text = data.Name or "Toggle"
-	nameLabel.TextColor3 = scheme.ElementText
-	nameLabel.TextSize = self.Theme.TextSize
-	nameLabel.TextXAlignment = Enum.TextXAlignment.Left
-	nameLabel.Size = UDim2.new(1, -60, 1, 0)
-	nameLabel.Position = UDim2.new(0, 10, 0, 0)
-	nameLabel.Parent = toggleFrame
+	local toggleBg = U:Create("Frame", {
+		Name = "ToggleBg",
+		BackgroundColor3 = scheme.stroke,
+		BorderSizePixel = 0,
+		Size = UDim2.new(0, 36, 0, 18),
+		Position = UDim2.new(1, -42, 0.5, -9),
+		Parent = toggleFrame,
+	})
 
-	local toggleIndicator = Instance.new("Frame")
-	toggleIndicator.Name = "Indicator"
-	toggleIndicator.BackgroundColor3 = scheme.ElementBackground
-	toggleIndicator.BorderSizePixel = 0
-	toggleIndicator.Size = UDim2.new(0, 44, 0, 22)
-	toggleIndicator.Position = UDim2.new(1, -52, 0.5, -11)
-	toggleIndicator.Parent = toggleFrame
+	U:CreateCorner(toggleBg, UDim.new(0, 9))
 
-	self.Utility:CreateCorner(toggleIndicator, UDim.new(0, 11))
+	local toggleCircle = U:Create("Frame", {
+		Name = "Circle",
+		BackgroundColor3 = scheme.textDim,
+		BorderSizePixel = 0,
+		Size = UDim2.new(0, 14, 0, 14),
+		Position = UDim2.new(0, 2, 0.5, -7),
+		Parent = toggleBg,
+	})
 
-	local toggleCircle = Instance.new("Frame")
-	toggleCircle.Name = "Circle"
-	toggleCircle.BackgroundColor3 = scheme.ElementTextSecondary
-	toggleCircle.BorderSizePixel = 0
-	toggleCircle.Size = UDim2.new(0, 18, 0, 18)
-	toggleCircle.Position = UDim2.new(0, 2, 0.5, -9)
-	toggleCircle.Parent = toggleIndicator
+	U:CreateCorner(toggleCircle, UDim.new(0, 7))
 
-	self.Utility:CreateCorner(toggleCircle, UDim.new(0, 9))
+	local inputObj = Instance.new("TextButton")
+	inputObj.Name = "Input"
+	inputObj.BackgroundTransparency = 1
+	inputObj.BorderSizePixel = 0
+	inputObj.Size = UDim2.new(1, 0, 1, 0)
+	inputObj.Text = ""
+	inputObj.Parent = toggleFrame
 
-	toggleBtn.MouseButton1Click:Connect(function()
+	inputObj.MouseButton1Click:Connect(function()
 		self.Value = not self.Value
 		self:UpdateVisuals()
-		self.Callback(self.Value)
+		data.Callback(self.Value)
 	end)
 
 	self.Frame = toggleFrame
-	self.ToggleBtn = toggleBtn
-	self.ToggleIndicator = toggleIndicator
+	self.ToggleBg = toggleBg
 	self.ToggleCircle = toggleCircle
 	self.NameLabel = nameLabel
+	self.InputObj = inputObj
 
 	self:UpdateVisuals()
 
@@ -93,16 +98,16 @@ end
 function Toggle:UpdateVisuals()
 	local scheme = self.Theme:GetScheme()
 	if self.Value then
-		self.Utility:Tween(self.ToggleIndicator, {BackgroundColor3 = scheme.Accent}, 0.15)
+		self.Utility:Tween(self.ToggleBg, {BackgroundColor3 = scheme.Accent}, 0.15)
 		self.Utility:Tween(self.ToggleCircle, {
 			BackgroundColor3 = Color3.fromRGB(255, 255, 255),
-			Position = UDim2.new(0, 24, 0.5, -9)
+			Position = UDim2.new(0, 20, 0.5, -7)
 		}, 0.15)
 	else
-		self.Utility:Tween(self.ToggleIndicator, {BackgroundColor3 = scheme.ElementBackground}, 0.15)
+		self.Utility:Tween(self.ToggleBg, {BackgroundColor3 = scheme.stroke}, 0.15)
 		self.Utility:Tween(self.ToggleCircle, {
-			BackgroundColor3 = scheme.ElementTextSecondary,
-			Position = UDim2.new(0, 2, 0.5, -9)
+			BackgroundColor3 = scheme.textDim,
+			Position = UDim2.new(0, 2, 0.5, -7)
 		}, 0.15)
 	end
 end

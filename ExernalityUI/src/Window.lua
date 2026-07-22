@@ -1,8 +1,7 @@
 local Window = {}
 Window.__index = Window
 
-local TweenService = game:GetService("TweenService")
-local UserInputService = game:GetService("UserInputService")
+local Players = game:GetService("Players")
 
 function Window.new(theme, utility, notification)
 	local self = setmetatable({}, Window)
@@ -10,13 +9,11 @@ function Window.new(theme, utility, notification)
 	self.Utility = utility
 	self.Notification = notification
 	self.Tabs = {}
+	self.TabButtons = {}
+	self.TabFrames = {}
 	self.ActiveTab = nil
 	self.Destroyed = false
 	self.Visible = true
-	self.Draggable = true
-	self.TopbarHeight = 40
-	self.TabBarWidth = 180
-	self.MinSize = UDim2.new(0, 600, 0, 400)
 	return self
 end
 
@@ -26,139 +23,192 @@ function Window:Create(data)
 	data.Version = data.Version or "v1.0"
 
 	local scheme = self.Theme:GetScheme()
+	local T = self.Theme
+	local U = self.Utility
 
-	local gui = Instance.new("ScreenGui")
-	gui.Name = "ExernalityUI"
-	gui.ResetOnSpawn = false
-	gui.Parent = game:GetService("CoreGui")
+	local player = Players.LocalPlayer
+	local playerGui = player:WaitForChild("PlayerGui")
 
-	local mainFrame = Instance.new("Frame")
-	mainFrame.Name = "Main"
-	mainFrame.BackgroundColor3 = scheme.Background
-	mainFrame.BorderSizePixel = 0
-	mainFrame.Position = UDim2.new(0.5, -400, 0.5, -250)
-	mainFrame.Size = UDim2.new(0, 800, 0, 500)
-	mainFrame.ClipsDescendants = true
-	mainFrame.Parent = gui
-
-	self.Utility:CreateCorner(mainFrame)
-	self.Utility:CreateShadow(mainFrame, scheme.Transparency.Shadow, scheme.Shadow)
-
-	local topbar = Instance.new("Frame")
-	topbar.Name = "Topbar"
-	topbar.BackgroundColor3 = scheme.Topbar
-	topbar.BorderSizePixel = 0
-	topbar.Size = UDim2.new(1, 0, 0, self.TopbarHeight)
-	topbar.Parent = mainFrame
-
-	local topbarCorner = Instance.new("UICorner")
-	topbarCorner.CornerRadius = UDim.new(0, 6)
-	topbarCorner.Parent = topbar
-
-	local topbarGradient = Instance.new("UIGradient")
-	topbarGradient.Color = ColorSequence.new({
-		ColorSequenceKeypoint.new(0, scheme.Topbar),
-		ColorSequenceKeypoint.new(1, scheme.Topbar:Lerp(Color3.fromRGB(255, 255, 255), 0.02)),
+	local gui = U:Create("ScreenGui", {
+		Name = "Exernality",
+		ResetOnSpawn = true,
+		IgnoreGuiInset = false,
+		ScreenInsets = Enum.ScreenInsets.CoreUISafeInsets,
+		ClipToDeviceSafeArea = true,
+		ZIndexBehavior = Enum.ZIndexBehavior.Sibling,
+		Parent = playerGui,
 	})
-	topbarGradient.Parent = topbar
 
-	local titleLabel = Instance.new("TextLabel")
-	titleLabel.Name = "Title"
-	titleLabel.BackgroundTransparency = 1
-	titleLabel.BorderSizePixel = 0
-	titleLabel.Font = self.Theme.Font
-	titleLabel.Text = data.Name or "Exernality"
-	titleLabel.TextColor3 = scheme.TopbarText
-	titleLabel.TextSize = self.Theme.TextSize + 2
-	titleLabel.TextXAlignment = Enum.TextXAlignment.Left
-	titleLabel.Size = UDim2.new(0.5, -20, 1, 0)
-	titleLabel.Position = UDim2.new(0, 15, 0, 0)
-	titleLabel.Parent = topbar
+	local outline = U:Create("Frame", {
+		Name = "ExernalityOutline",
+		Position = UDim2.new(0.19056724, 0, 0.20240964, 0),
+		Size = UDim2.new(0, T.WindowWidth, 0, T.WindowHeight),
+		BackgroundTransparency = 1,
+		BackgroundColor3 = scheme.bg,
+		BorderSizePixel = 0,
+		ClipsDescendants = false,
+		ZIndex = 2,
+		Parent = gui,
+	})
 
-	local versionLabel = Instance.new("TextLabel")
-	versionLabel.Name = "Version"
-	versionLabel.BackgroundTransparency = 1
-	versionLabel.BorderSizePixel = 0
-	versionLabel.Font = self.Theme.Font
-	versionLabel.Text = data.Version or ""
-	versionLabel.TextColor3 = scheme.ElementTextSecondary
-	versionLabel.TextSize = self.Theme.TextSize - 3
-	versionLabel.TextXAlignment = Enum.TextXAlignment.Right
-	versionLabel.Size = UDim2.new(0.5, -20, 1, 0)
-	versionLabel.Position = UDim2.new(0.5, 0, 0, 0)
-	versionLabel.Parent = topbar
+	U:CreateStroke(outline, Color3.fromRGB(138, 138, 138), 1, Enum.BorderStrokePosition.Outer)
+	U:CreateCorner(outline)
 
-	local closeBtn = Instance.new("ImageButton")
-	closeBtn.Name = "Close"
-	closeBtn.BackgroundTransparency = 1
-	closeBtn.BorderSizePixel = 0
-	closeBtn.Size = UDim2.new(0, 24, 0, 24)
-	closeBtn.Position = UDim2.new(1, -32, 0.5, -12)
-	closeBtn.Image = "rbxassetid://6031094678"
-	closeBtn.ImageColor3 = scheme.ElementTextSecondary
-	closeBtn.Parent = topbar
+	local mainFrame = U:Create("Frame", {
+		Name = "Exernality",
+		Position = UDim2.new(0.19056724, 0, 0.20240964, 0),
+		Size = UDim2.new(0, T.WindowWidth, 0, T.WindowHeight),
+		BackgroundColor3 = scheme.bg,
+		BackgroundTransparency = 0,
+		BorderSizePixel = 0,
+		ClipsDescendants = false,
+		ZIndex = 1,
+		Parent = gui,
+	})
 
-	closeBtn.InputBegan:Connect(function(input)
-		if input.UserInputType == Enum.UserInputType.MouseButton1 then
-			self:Destroy()
-		end
-	end)
+	U:CreateShadow(mainFrame, 0.06, Color3.fromRGB(0, 0, 0), 25)
+	U:CreateCorner(mainFrame)
 
-	local tabBar = Instance.new("Frame")
-	tabBar.Name = "TabBar"
-	tabBar.BackgroundColor3 = scheme.TabBackground
-	tabBar.BorderSizePixel = 0
-	tabBar.Size = UDim2.new(0, self.TabBarWidth, 1, -self.TopbarHeight)
-	tabBar.Position = UDim2.new(0, 0, 0, self.TopbarHeight)
-	tabBar.Parent = mainFrame
+	-- Logo
+	local logo = U:Create("ImageLabel", {
+		Name = "ImageLabel",
+		Position = UDim2.new(0.010309278, 0, 0.0118577071, 0),
+		Size = UDim2.new(0, 27, 0, 27),
+		BackgroundColor3 = scheme.white,
+		BackgroundTransparency = 0,
+		BorderSizePixel = 0,
+		Image = data.Logo or "rbxassetid://94904426200943",
+		ImageColor3 = scheme.white,
+		ImageTransparency = 0,
+		ScaleType = Enum.ScaleType.Stretch,
+		ZIndex = 1,
+		Parent = mainFrame,
+	})
 
-	local tabBarCorner = Instance.new("UICorner")
-	tabBarCorner.CornerRadius = UDim.new(0, 6)
-	tabBarCorner.Parent = tabBar
+	U:CreateStroke(logo, scheme.strokeOuter, 1)
 
-	local tabBarPadding = Instance.new("UIPadding")
-	tabBarPadding.PaddingTop = UDim.new(0, 8)
-	tabBarPadding.PaddingBottom = UDim.new(0, 8)
-	tabBarPadding.PaddingLeft = UDim.new(0, 4)
-	tabBarPadding.PaddingRight = UDim.new(0, 4)
-	tabBarPadding.Parent = tabBar
+	-- Topbar Line (horizontal separator area)
+	local lineH = U:Create("Frame", {
+		Name = "Line",
+		Position = UDim2.new(0, 0, 0, 0),
+		Size = UDim2.new(0, T.WindowWidth, 0, T.TopbarHeight),
+		BackgroundTransparency = 1,
+		BackgroundColor3 = scheme.white,
+		BorderSizePixel = 0,
+		ClipsDescendants = false,
+		ZIndex = 15,
+		Parent = mainFrame,
+	})
 
-	local tabList = Instance.new("ScrollingFrame")
-	tabList.Name = "TabList"
-	tabList.BackgroundTransparency = 1
-	tabList.BorderSizePixel = 0
-	tabList.ScrollBarThickness = 0
-	tabList.CanvasSize = UDim2.new(0, 0, 0, 0)
-	tabList.ScrollingDirection = Enum.ScrollingDirection.Y
-	tabList.AutomaticCanvasSize = Enum.AutomaticSize.Y
-	tabList.Size = UDim2.new(1, 0, 1, 0)
-	tabList.Parent = tabBar
+	U:CreateStroke(lineH, Color3.fromRGB(52, 52, 53), 1)
 
-	local tabListLayout = Instance.new("UIListLayout")
-	tabListLayout.Padding = UDim.new(0, 2)
-	tabListLayout.FillDirection = Enum.FillDirection.Vertical
-	tabListLayout.HorizontalAlignment = Enum.HorizontalAlignment.Center
-	tabListLayout.SortOrder = Enum.SortOrder.LayoutOrder
-	tabListLayout.Parent = tabList
+	local lineHCorner = Instance.new("UICorner")
+	lineHCorner.CornerRadius = UDim.new(0, 5)
+	lineHCorner.TopLeftRadius = UDim.new(0, 5)
+	lineHCorner.TopRightRadius = UDim.new(0, 5)
+	lineHCorner.BottomLeftRadius = UDim.new(0, 0)
+	lineHCorner.BottomRightRadius = UDim.new(0, 0)
+	lineHCorner.Parent = lineH
 
-	local contentArea = Instance.new("Frame")
-	contentArea.Name = "ContentArea"
-	contentArea.BackgroundTransparency = 1
-	contentArea.BorderSizePixel = 0
-	contentArea.Size = UDim2.new(1, -self.TabBarWidth, 1, -self.TopbarHeight)
-	contentArea.Position = UDim2.new(0, self.TabBarWidth, 0, self.TopbarHeight)
-	contentArea.Parent = mainFrame
+	-- Title "Exernality"
+	local titleLabel = U:Create("TextLabel", {
+		Name = "Exernality",
+		Position = UDim2.new(0.0525773205, 0, -0.00197628466, 0),
+		Size = UDim2.new(0, 236, 0, T.TopbarHeight),
+		BackgroundColor3 = scheme.bg,
+		BackgroundTransparency = 0,
+		BorderSizePixel = 0,
+		Text = data.Name,
+		TextColor3 = scheme.text,
+		TextTransparency = 0,
+		TextSize = T.TextSizeTitle,
+		FontFace = T.Font,
+		TextXAlignment = Enum.TextXAlignment.Left,
+		TextYAlignment = Enum.TextYAlignment.Center,
+		RichText = false,
+		ZIndex = 1,
+		Parent = mainFrame,
+	})
+
+	-- Version
+	local versionLabel = U:Create("TextLabel", {
+		Name = "Version",
+		Position = UDim2.new(0.165979385, 0, 0, 0),
+		Size = UDim2.new(0, 236, 0, T.TopbarHeight),
+		BackgroundColor3 = scheme.bg,
+		BackgroundTransparency = 0,
+		BorderSizePixel = 0,
+		Text = data.Version or "v1.0",
+		TextColor3 = scheme.textDim,
+		TextTransparency = 0,
+		TextSize = T.TextSizeTitle,
+		FontFace = T.Font,
+		TextXAlignment = Enum.TextXAlignment.Left,
+		TextYAlignment = Enum.TextYAlignment.Center,
+		RichText = false,
+		ZIndex = 1,
+		Parent = mainFrame,
+	})
+
+	-- Line2 - Vertical separator (left sidebar background)
+	local lineV = U:Create("Frame", {
+		Name = "Line2",
+		Position = UDim2.new(0, 0, 0, 0),
+		Size = UDim2.new(0, T.SidebarWidth, 0, T.WindowHeight),
+		BackgroundTransparency = 1,
+		BackgroundColor3 = scheme.white,
+		BorderSizePixel = 0,
+		ClipsDescendants = false,
+		ZIndex = 15,
+		Parent = mainFrame,
+	})
+
+	U:CreateStroke(lineV, scheme.stroke, 1)
+
+	local lineVCorner = Instance.new("UICorner")
+	lineVCorner.CornerRadius = UDim.new(0, 5)
+	lineVCorner.TopLeftRadius = UDim.new(0, 5)
+	lineVCorner.TopRightRadius = UDim.new(0, 0)
+	lineVCorner.BottomLeftRadius = UDim.new(0, 5)
+	lineVCorner.BottomRightRadius = UDim.new(0, 0)
+	lineVCorner.Parent = lineV
+
+	-- Tab_Buttons container
+	local tabButtons = U:Create("Frame", {
+		Name = "Tab_Buttons",
+		Position = UDim2.new(0, 0, 0.154150203, 0),
+		Size = UDim2.new(0, T.SidebarWidth, 0, T.WindowHeight - 78),
+		BackgroundTransparency = 1,
+		BorderSizePixel = 0,
+		ClipsDescendants = false,
+		ZIndex = 1,
+		Parent = mainFrame,
+	})
+
+	-- Tabs content frame
+	local tabsFrame = U:Create("Frame", {
+		Name = "Tabs",
+		Position = UDim2.new(0.153608248, 0, 0.0770751014, 0),
+		Size = UDim2.new(0, T.ContentWidth, 0, T.ContentHeight),
+		BackgroundTransparency = 1,
+		BorderSizePixel = 0,
+		ClipsDescendants = false,
+		ZIndex = 1,
+		Parent = mainFrame,
+	})
 
 	self.Gui = gui
+	self.Outline = outline
 	self.Main = mainFrame
-	self.Topbar = topbar
-	self.TabBar = tabBar
-	self.TabList = tabList
-	self.ContentArea = contentArea
-	self.CloseBtn = closeBtn
+	self.Logo = logo
+	self.LineH = lineH
+	self.LineV = lineV
+	self.TabButtons = tabButtons
+	self.TabsFrame = tabsFrame
 	self.TitleLabel = titleLabel
+	self.VersionLabel = versionLabel
 
-	self.Utility:MakeDraggable(mainFrame, topbar)
+	U:MakeDraggable(mainFrame, lineH)
 
 	return self
 end
@@ -202,11 +252,13 @@ end
 function Window:Toggle()
 	self.Visible = not self.Visible
 	self.Main.Visible = self.Visible
+	self.Outline.Visible = self.Visible
 end
 
 function Window:SetVisible(visible)
 	self.Visible = visible
 	self.Main.Visible = visible
+	self.Outline.Visible = visible
 end
 
 return Window

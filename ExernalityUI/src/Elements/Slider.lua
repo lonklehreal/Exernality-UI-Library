@@ -28,6 +28,8 @@ function Slider:Create(data)
 	data.Decimal = data.Decimal or 0
 
 	local scheme = self.Theme:GetScheme()
+	local T = self.Theme
+	local U = self.Utility
 	self.Min = data.Min
 	self.Max = data.Max
 	self.Value = data.Default
@@ -35,76 +37,84 @@ function Slider:Create(data)
 	self.Suffix = data.Suffix
 	self.Decimal = data.Decimal
 
-	local sliderFrame = Instance.new("Frame")
-	sliderFrame.Name = "Slider_" .. data.Name
-	sliderFrame.BackgroundColor3 = scheme.ElementBackground
-	sliderFrame.BorderSizePixel = 0
-	sliderFrame.Size = UDim2.new(1, 0, 0, 48)
-	sliderFrame.Parent = self.Section.ElementContainer
+	local sliderFrame = U:Create("Frame", {
+		Name = "Slider_" .. data.Name,
+		BackgroundColor3 = scheme.ElementBg,
+		BackgroundTransparency = scheme.ElementBgTransparency,
+		BorderSizePixel = 0,
+		Size = UDim2.new(1, -8, 0, 40),
+		Parent = self.Section.ElementContainer,
+	})
 
-	self.Utility:CreateCorner(sliderFrame)
+	U:CreateCorner(sliderFrame)
 
-	local nameLabel = Instance.new("TextLabel")
-	nameLabel.Name = "Name"
-	nameLabel.BackgroundTransparency = 1
-	nameLabel.BorderSizePixel = 0
-	nameLabel.Font = self.Theme.Font
-	nameLabel.Text = data.Name or "Slider"
-	nameLabel.TextColor3 = scheme.ElementText
-	nameLabel.TextSize = self.Theme.TextSize
-	nameLabel.TextXAlignment = Enum.TextXAlignment.Left
-	nameLabel.Size = UDim2.new(0.5, -10, 0, 18)
-	nameLabel.Position = UDim2.new(0, 10, 0, 6)
-	nameLabel.Parent = sliderFrame
+	local nameLabel = U:Create("TextLabel", {
+		Name = "Name",
+		BackgroundTransparency = 1,
+		BorderSizePixel = 0,
+		FontFace = T.Font,
+		Text = data.Name,
+		TextColor3 = scheme.text,
+		TextSize = T.TextSize - 2,
+		TextXAlignment = Enum.TextXAlignment.Left,
+		Size = UDim2.new(0.6, -4, 0, 16),
+		Position = UDim2.new(0, 6, 0, 3),
+		Parent = sliderFrame,
+	})
 
-	local valueLabel = Instance.new("TextLabel")
-	valueLabel.Name = "Value"
-	valueLabel.BackgroundTransparency = 1
-	valueLabel.BorderSizePixel = 0
-	valueLabel.Font = self.Theme.Font
-	valueLabel.Text = tostring(data.Default) .. data.Suffix
-	valueLabel.TextColor3 = scheme.Accent
-	valueLabel.TextSize = self.Theme.TextSize
-	valueLabel.TextXAlignment = Enum.TextXAlignment.Right
-	valueLabel.Size = UDim2.new(0.5, -10, 0, 18)
-	valueLabel.Position = UDim2.new(0.5, 0, 0, 6)
-	valueLabel.Parent = sliderFrame
+	local valueLabel = U:Create("TextLabel", {
+		Name = "Value",
+		BackgroundTransparency = 1,
+		BorderSizePixel = 0,
+		FontFace = T.Font,
+		Text = tostring(data.Default) .. data.Suffix,
+		TextColor3 = scheme.Accent,
+		TextSize = T.TextSize - 2,
+		TextXAlignment = Enum.TextXAlignment.Right,
+		Size = UDim2.new(0.4, -4, 0, 16),
+		Position = UDim2.new(0.6, 0, 0, 3),
+		Parent = sliderFrame,
+	})
 
-	local sliderBg = Instance.new("Frame")
-	sliderBg.Name = "SliderBg"
-	sliderBg.BackgroundColor3 = scheme.ElementBackgroundHover
-	sliderBg.BorderSizePixel = 0
-	sliderBg.Size = UDim2.new(1, -20, 0, 6)
-	sliderBg.Position = UDim2.new(0, 10, 0, 32)
-	sliderBg.Parent = sliderFrame
+	local sliderBg = U:Create("Frame", {
+		Name = "SliderBg",
+		BackgroundColor3 = scheme.stroke,
+		BorderSizePixel = 0,
+		Size = UDim2.new(1, -12, 0, 4),
+		Position = UDim2.new(0, 6, 0, 24),
+		Parent = sliderFrame,
+	})
 
-	self.Utility:CreateCorner(sliderBg, UDim.new(0, 3))
+	U:CreateCorner(sliderBg, UDim.new(0, 2))
 
-	local sliderFill = Instance.new("Frame")
-	sliderFill.Name = "Fill"
-	sliderFill.BackgroundColor3 = scheme.Accent
-	sliderFill.BorderSizePixel = 0
-	sliderFill.Size = UDim2.new(0, 0, 1, 0)
-	sliderFill.Parent = sliderBg
+	local sliderFill = U:Create("Frame", {
+		Name = "Fill",
+		BackgroundColor3 = scheme.Accent,
+		BorderSizePixel = 0,
+		Size = UDim2.new(0, 0, 1, 0),
+		Parent = sliderBg,
+	})
 
-	self.Utility:CreateCorner(sliderFill, UDim.new(0, 3))
+	U:CreateCorner(sliderFill, UDim.new(0, 2))
 
-	local sliderKnob = Instance.new("Frame")
-	sliderKnob.Name = "Knob"
-	sliderKnob.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-	sliderKnob.BorderSizePixel = 0
-	sliderKnob.Size = UDim2.new(0, 14, 0, 14)
-	sliderKnob.Position = UDim2.new(0, 0, 0.5, -7)
-	sliderKnob.Parent = sliderFrame
+	local sliderKnob = U:Create("Frame", {
+		Name = "Knob",
+		BackgroundColor3 = scheme.white,
+		BorderSizePixel = 0,
+		Size = UDim2.new(0, 12, 0, 12),
+		Position = UDim2.new(0, 0, 0.5, -6),
+		Parent = sliderFrame,
+	})
 
-	self.Utility:CreateCorner(sliderKnob, UDim.new(0, 7))
+	U:CreateCorner(sliderKnob, UDim.new(0, 6))
+	U:CreateStroke(sliderKnob, scheme.stroke, 1)
 
 	local function updateSlider(inputPos)
 		local absPos = sliderBg.AbsolutePosition
 		local absSize = sliderBg.AbsoluteSize
-		local relativeX = math.clamp(inputPos.X - absPos.X, 0, absSize.X)
-		local percent = relativeX / absSize.X
-		local value = self.Min + (self.Max - self.Min) * percent
+		local relX = math.clamp(inputPos.X - absPos.X, 0, absSize.X)
+		local pct = absSize.X > 0 and relX / absSize.X or 0
+		local value = self.Min + (self.Max - self.Min) * pct
 		if self.Decimal > 0 then
 			value = math.round(value * (10 ^ self.Decimal)) / (10 ^ self.Decimal)
 		else
@@ -113,7 +123,7 @@ function Slider:Create(data)
 		value = math.clamp(value, self.Min, self.Max)
 		self.Value = value
 		self:UpdateVisuals()
-		self.Callback(value)
+		data.Callback(value)
 	end
 
 	sliderBg.InputBegan:Connect(function(input)
@@ -129,13 +139,13 @@ function Slider:Create(data)
 		end
 	end)
 
-	local moveConnection = UserInputService.InputChanged:Connect(function(input)
+	UserInputService.InputChanged:Connect(function(input)
 		if self.Dragging and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
 			updateSlider(input)
 		end
 	end)
 
-	local endConnection = UserInputService.InputEnded:Connect(function(input)
+	UserInputService.InputEnded:Connect(function(input)
 		if input.UserInputType == Enum.UserInputType.MouseButton1 then
 			self.Dragging = false
 		end
@@ -155,15 +165,11 @@ end
 
 function Slider:UpdateVisuals()
 	local percent = (self.Value - self.Min) / (self.Max - self.Min)
-	local fillWidth = percent * (self.SliderBg.AbsoluteSize.X - 14)
-	self.SliderFill.Size = UDim2.new(0, fillWidth, 1, 0)
-	self.SliderKnob.Position = UDim2.new(0, fillWidth, 0.5, -7)
-	local display = self.Value
-	if self.Decimal > 0 then
-		display = string.format("%." .. self.Decimal .. "f", self.Value)
-	else
-		display = tostring(math.floor(self.Value))
-	end
+	local absW = self.SliderBg.AbsoluteSize.X
+	local fillW = absW > 0 and percent * absW or 0
+	self.SliderFill.Size = UDim2.new(0, fillW, 1, 0)
+	self.SliderKnob.Position = UDim2.new(0, fillW - 6, 0.5, -6)
+	local display = self.Decimal > 0 and string.format("%." .. self.Decimal .. "f", self.Value) or tostring(math.floor(self.Value))
 	self.ValueLabel.Text = display .. self.Suffix
 end
 

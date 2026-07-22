@@ -1,7 +1,18 @@
 local Tab = {}
 Tab.__index = Tab
 
-local TweenService = game:GetService("TweenService")
+local tabButtonData = {
+	{ strokePosition = Enum.BorderStrokePosition.Inner },
+	{ strokePosition = Enum.BorderStrokePosition.Outer },
+	{ strokePosition = Enum.BorderStrokePosition.Inner },
+	{ strokePosition = Enum.BorderStrokePosition.Outer },
+	{ strokePosition = Enum.BorderStrokePosition.Inner },
+	{ strokePosition = Enum.BorderStrokePosition.Outer },
+	{ strokePosition = Enum.BorderStrokePosition.Inner },
+	{ strokePosition = Enum.BorderStrokePosition.Outer },
+}
+
+local tabIndex = 0
 
 function Tab.new(theme, utility, window)
 	local self = setmetatable({}, Tab)
@@ -12,6 +23,8 @@ function Tab.new(theme, utility, window)
 	self.Active = false
 	self.Button = nil
 	self.Container = nil
+	self.Index = tabIndex + 1
+	tabIndex = self.Index
 	return self
 end
 
@@ -21,104 +34,101 @@ function Tab:Create(data)
 	data.Icon = data.Icon or ""
 
 	local scheme = self.Theme:GetScheme()
+	local T = self.Theme
+	local U = self.Utility
 
-	local tabButton = Instance.new("ImageButton")
-	tabButton.Name = "Tab_" .. data.Name
-	tabButton.BackgroundColor3 = scheme.TabBackground
-	tabButton.BackgroundTransparency = 1
-	tabButton.BorderSizePixel = 0
-	tabButton.Size = UDim2.new(1, -8, 0, 36)
-	tabButton.Parent = self.Window.TabList
+	local btnData = tabButtonData[(self.Index - 1) % #tabButtonData + 1]
 
-	local tabButtonCorner = Instance.new("UICorner")
-	tabButtonCorner.CornerRadius = UDim.new(0, 4)
-	tabButtonCorner.Parent = tabButton
+	local btn = U:Create("Frame", {
+		Name = data.Name,
+		Position = UDim2.new(0, 0, 0, (self.Index - 1) * 39),
+		Size = UDim2.new(0, T.SidebarWidth, 0, 39),
+		BackgroundColor3 = scheme.bg,
+		BackgroundTransparency = 0,
+		BorderSizePixel = 0,
+		ClipsDescendants = false,
+		ZIndex = 1,
+		Parent = self.Window.TabButtons,
+	})
 
-	local iconLabel
-	if data.Icon and data.Icon ~= "" then
-		iconLabel = Instance.new("ImageLabel")
-		iconLabel.Name = "Icon"
-		iconLabel.BackgroundTransparency = 1
-		iconLabel.BorderSizePixel = 0
-		iconLabel.Size = UDim2.new(0, 20, 0, 20)
-		iconLabel.Position = UDim2.new(0, 10, 0.5, -10)
-		iconLabel.Image = data.Icon
-		iconLabel.ImageColor3 = self.Theme:GetScheme().TabText
-		iconLabel.Parent = tabButton
-	end
+	U:CreateStroke(btn, scheme.stroke, 1, btnData.strokePosition)
 
-	local nameLabel = Instance.new("TextLabel")
-	nameLabel.Name = "Name"
-	nameLabel.BackgroundTransparency = 1
-	nameLabel.BorderSizePixel = 0
-	nameLabel.Font = self.Theme.Font
-	nameLabel.Text = data.Name
-	nameLabel.TextColor3 = self.Theme:GetScheme().TabText
-	nameLabel.TextSize = self.Theme.TextSize
-	nameLabel.TextXAlignment = Enum.TextXAlignment.Left
-	nameLabel.Size = UDim2.new(1, -40, 1, 0)
-	nameLabel.Position = UDim2.new(0, 40, 0, 0)
-	nameLabel.Parent = tabButton
+	local icon = U:Create("ImageLabel", {
+		Name = "ImageLabel",
+		Position = UDim2.new(0.0738255009, 0, 0.179487184, 0),
+		Size = UDim2.new(0, 25, 0, 25),
+		BackgroundColor3 = scheme.bg,
+		BackgroundTransparency = 0,
+		BorderSizePixel = 0,
+		Image = data.Icon,
+		ImageColor3 = scheme.text,
+		ImageTransparency = 0,
+		ScaleType = Enum.ScaleType.Stretch,
+		ZIndex = 1,
+		Parent = btn,
+	})
 
-	local indicator = Instance.new("Frame")
-	indicator.Name = "Indicator"
-	indicator.BackgroundColor3 = self.Theme:GetScheme().TabIndicator
-	indicator.BorderSizePixel = 0
-	indicator.Size = UDim2.new(0, 3, 0, 0)
-	indicator.Position = UDim2.new(0, 0, 0.5, 0)
-	indicator.Visible = false
-	indicator.Parent = tabButton
+	local nameLabel = U:Create("TextLabel", {
+		Name = "Exernality",
+		Position = UDim2.new(0.341167688, 0, -0.00197660015, 0),
+		Size = UDim2.new(0, 97, 0, 39),
+		BackgroundColor3 = scheme.bg,
+		BackgroundTransparency = 1,
+		BorderSizePixel = 0,
+		Text = data.Name,
+		TextColor3 = scheme.text,
+		TextTransparency = 0,
+		TextSize = T.TextSizeTitle,
+		FontFace = T.Font,
+		TextXAlignment = Enum.TextXAlignment.Left,
+		TextYAlignment = Enum.TextYAlignment.Center,
+		RichText = false,
+		ZIndex = 1,
+		Parent = btn,
+	})
 
-	local indicatorCorner = Instance.new("UICorner")
-	indicatorCorner.CornerRadius = UDim.new(0, 2)
-	indicatorCorner.Parent = indicator
+	-- Tab content container
+	local tabFrame = U:Create("Frame", {
+		Name = data.Name,
+		Position = UDim2.new(0, 0, 0, 0),
+		Size = UDim2.new(0, T.ContentWidth, 0, T.ContentHeight),
+		BackgroundTransparency = 1,
+		BorderSizePixel = 0,
+		ClipsDescendants = false,
+		Visible = false,
+		ZIndex = 1,
+		Parent = self.Window.TabsFrame,
+	})
 
-	tabButton.InputBegan:Connect(function(input)
-		if input.UserInputType == Enum.UserInputType.MouseButton1 then
-			self.Window:SelectTab(self)
-		end
+	-- Click handling
+	local inputObj = Instance.new("TextButton")
+	inputObj.Name = "Input"
+	inputObj.BackgroundTransparency = 1
+	inputObj.BorderSizePixel = 0
+	inputObj.Size = UDim2.new(1, 0, 1, 0)
+	inputObj.Text = ""
+	inputObj.Parent = btn
+
+	inputObj.MouseButton1Click:Connect(function()
+		self.Window:SelectTab(self)
 	end)
 
-	tabButton.MouseEnter:Connect(function()
-		if not self.Active then
-			self.Utility:Tween(tabButton, {BackgroundTransparency = 0.9}, 0.15)
-		end
-	end)
-
-	tabButton.MouseLeave:Connect(function()
-		if not self.Active then
-			self.Utility:Tween(tabButton, {BackgroundTransparency = 1}, 0.15)
-		end
-	end)
-
-	self.Button = tabButton
-	self.IconLabel = iconLabel
+	self.Button = btn
+	self.Icon = icon
 	self.NameLabel = nameLabel
-	self.Indicator = indicator
+	self.Container = tabFrame
+	self.InputObj = inputObj
 
 	return self
 end
 
 function Tab:SetActive(active)
 	self.Active = active
-	if active then
-		self.Container.Visible = true
-		self.Indicator.Visible = true
-		self.Utility:Tween(self.Indicator, {Size = UDim2.new(0, 3, 0, 20)}, 0.2)
-		self.Utility:Tween(self.Button, {BackgroundTransparency = 0.85}, 0.2)
-		self.NameLabel.TextColor3 = self.Theme:GetScheme().TabTextActive
-		if self.IconLabel then
-			self.IconLabel.ImageColor3 = self.Theme:GetScheme().TabTextActive
-		end
-	else
-		self.Container.Visible = false
-		self.Indicator.Visible = false
-		self.Utility:Tween(self.Indicator, {Size = UDim2.new(0, 3, 0, 0)}, 0.2)
-		self.Utility:Tween(self.Button, {BackgroundTransparency = 1}, 0.2)
-		self.NameLabel.TextColor3 = self.Theme:GetScheme().TabText
-		if self.IconLabel then
-			self.IconLabel.ImageColor3 = self.Theme:GetScheme().TabText
-		end
+	if self.Container then
+		self.Container.Visible = active
+	end
+	if self.Icon then
+		self.Icon.ImageColor3 = active and self.Theme:GetScheme().text or self.Theme:GetScheme().textDim
 	end
 end
 

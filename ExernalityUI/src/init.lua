@@ -1,5 +1,4 @@
 local ExernalityUI = {}
-ExernalityUI.__index = ExernalityUI
 
 local Theme = require(script.Theme)
 local Utility = require(script.Utility)

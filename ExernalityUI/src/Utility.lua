@@ -6,7 +6,6 @@ local Utility = {}
 function Utility:MakeDraggable(frame, dragHandle)
 	dragHandle = dragHandle or frame
 	local dragging, dragStart, startPos
-
 	dragHandle.InputBegan:Connect(function(input)
 		if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
 			dragging = true
@@ -19,27 +18,22 @@ function Utility:MakeDraggable(frame, dragHandle)
 			end)
 		end
 	end)
-
 	local inputConnection = dragHandle.InputChanged:Connect(function(input)
 		if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then
 			if dragging then
 				local delta = input.Position - dragStart
 				frame.Position = UDim2.new(
-					startPos.X.Scale,
-					startPos.X.Offset + delta.X,
-					startPos.Y.Scale,
-					startPos.Y.Offset + delta.Y
+					startPos.X.Scale, startPos.X.Offset + delta.X,
+					startPos.Y.Scale, startPos.Y.Offset + delta.Y
 				)
 			end
 		end
 	end)
-
 	local endConnection = UserInputService.InputEnded:Connect(function(input)
 		if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
 			dragging = false
 		end
 	end)
-
 	return function()
 		inputConnection:Disconnect()
 		endConnection:Disconnect()
@@ -56,45 +50,56 @@ function Utility:Tween(obj, props, duration, easing, direction)
 end
 
 function Utility:Create(class, props)
-	local obj = Instance.new(class)
-	for k, v in pairs(props) do
-		if k ~= "Children" then
-			obj[k] = v
+	local inst = Instance.new(class)
+	for k, v in props do
+		if k ~= "Parent" and k ~= "Children" then
+			inst[k] = v
 		end
 	end
 	if props.Children then
 		for _, child in ipairs(props.Children) do
-			child.Parent = obj
+			child.Parent = inst
 		end
 	end
-	return obj
+	if props.Parent then
+		inst.Parent = props.Parent
+	end
+	return inst
 end
 
 function Utility:CreateCorner(parent, radius)
+	radius = radius or UDim.new(0, 5)
 	local corner = Instance.new("UICorner")
-	corner.CornerRadius = radius or UDim.new(0, 6)
+	corner.CornerRadius = radius
 	corner.Parent = parent
 	return corner
 end
 
-function Utility:CreatePadding(parent, padding)
-	padding = padding or UDim.new(0, 4)
-	local pad = Instance.new("UIPadding")
-	pad.PaddingTop = padding
-	pad.PaddingBottom = padding
-	pad.PaddingLeft = padding
-	pad.PaddingRight = padding
-	pad.Parent = parent
-	return pad
-end
-
-function Utility:CreateStroke(parent, color, thickness)
+function Utility:CreateStroke(parent, color, thickness, position)
 	thickness = thickness or 1
+	position = position or Enum.BorderStrokePosition.Outer
 	local stroke = Instance.new("UIStroke")
-	stroke.Color = color or Color3.fromRGB(50, 50, 50)
+	stroke.Color = color or Color3.fromRGB(52, 52, 52)
 	stroke.Thickness = thickness
+	stroke.BorderStrokePosition = position
+	stroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Contextual
+	stroke.LineJoinMode = Enum.LineJoinMode.Round
 	stroke.Parent = parent
 	return stroke
+end
+
+function Utility:CreateShadow(parent, transparency, color, blur)
+	transparency = transparency or 0.06
+	blur = blur or 25
+	local shadow = Instance.new("UIShadow")
+	shadow.Name = "UIShadow"
+	shadow.BlurRadius = UDim.new(0, blur)
+	shadow.Transparency = transparency
+	shadow.Color = color or Color3.fromRGB(0, 0, 0)
+	shadow.Offset = UDim2.new(0, 0, 0, 0)
+	shadow.Spread = UDim2.new(0, 0, 0, 0)
+	shadow.Parent = parent
+	return shadow
 end
 
 function Utility:CreateListLayout(parent, padding, fillDirection)
@@ -114,77 +119,12 @@ function Utility:CreateScrollingFrame(parent)
 	sf.BorderSizePixel = 0
 	sf.ScrollBarThickness = 4
 	sf.ScrollBarImageColor3 = Color3.fromRGB(80, 80, 80)
-	sf.ScrollBarImageTransparency = 0.3
+	sf.ScrollBarImageTransparency = 0.5
 	sf.CanvasSize = UDim2.new(0, 0, 0, 0)
 	sf.ScrollingDirection = Enum.ScrollingDirection.Y
 	sf.AutomaticCanvasSize = Enum.AutomaticSize.Y
 	sf.Parent = parent
 	return sf
-end
-
-function Utility:CreateShadow(parent, transparency, color)
-	transparency = transparency or 0.7
-	local shadow = Instance.new("ImageLabel")
-	shadow.Name = "Shadow"
-	shadow.BackgroundTransparency = 1
-	shadow.BorderSizePixel = 0
-	shadow.Image = "rbxassetid://6015897843"
-	shadow.ImageColor3 = color or Color3.fromRGB(0, 0, 0)
-	shadow.ImageTransparency = transparency
-	shadow.ScaleType = Enum.ScaleType.Slice
-	shadow.SliceCenter = Rect.new(23, 23, 23, 23)
-	shadow.Size = UDim2.new(1, 12, 1, 12)
-	shadow.Position = UDim2.new(0, -6, 0, -6)
-	shadow.ZIndex = 0
-	shadow.Parent = parent
-	return shadow
-end
-
-function Utility:CreateGradient(parent, color, reverse)
-	local gradient = Instance.new("UIGradient")
-	gradient.Color = ColorSequence.new({
-		ColorSequenceKeypoint.new(0, color or Color3.fromRGB(0, 0, 0)),
-		ColorSequenceKeypoint.new(1, (color or Color3.fromRGB(0, 0, 0)):Lerp(Color3.fromRGB(255, 255, 255), 0.05)),
-	})
-	if reverse then
-		gradient.Rotation = 180
-	end
-	gradient.Parent = parent
-	return gradient
-end
-
-function Utility:CreateOverlay(parent)
-	local overlay = Instance.new("Frame")
-	overlay.Name = "Overlay"
-	overlay.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-	overlay.BackgroundTransparency = 0.6
-	overlay.BorderSizePixel = 0
-	overlay.Size = UDim2.new(1, 0, 1, 0)
-	overlay.Position = UDim2.new(0, 0, 0, 0)
-	overlay.ZIndex = 10
-	overlay.Active = true
-	overlay.Parent = parent
-	return overlay
-end
-
-function Utility:CreateImageLabel(props)
-	return self:Create("ImageLabel", props)
-end
-
-function Utility:CreateTextLabel(props)
-	return self:Create("TextLabel", props)
-end
-
-function Utility:CreateImageButton(props)
-	return self:Create("ImageButton", props)
-end
-
-function Utility:CreateTextBox(props)
-	return self:Create("TextBox", props)
-end
-
-function Utility:CreateFrame(props)
-	return self:Create("Frame", props)
 end
 
 return Utility

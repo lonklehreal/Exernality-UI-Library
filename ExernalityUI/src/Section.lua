@@ -1,6 +1,11 @@
 local Section = {}
 Section.__index = Section
 
+local SECTION_X_OFFSET = 0.0199999046
+local SECTION_X_STEP = 0.28125
+local SECTION_Y_OFFSET = 0.0342612416
+local SECTION_Y_STEP = 0.468
+
 function Section.new(theme, utility, tab)
 	local self = setmetatable({}, Section)
 	self.Theme = theme
@@ -10,6 +15,7 @@ function Section.new(theme, utility, tab)
 	self.Elements = {}
 	self.Frame = nil
 	self.ElementContainer = nil
+	self.Index = #tab.Sections + 1
 	return self
 end
 
@@ -18,57 +24,75 @@ function Section:Create(data)
 	data.Name = data.Name or "Section"
 
 	local scheme = self.Theme:GetScheme()
+	local T = self.Theme
+	local U = self.Utility
 
-	if not self.Tab.Container then
-		local contentScrolling = self.Utility:CreateScrollingFrame(self.Window.ContentArea)
-		self.Tab.Container = contentScrolling
-		local layout = self.Utility:CreateListLayout(contentScrolling, UDim.new(0, 8))
-		layout.HorizontalAlignment = Enum.HorizontalAlignment.Left
-	end
+	local col = (self.Index - 1) % 3
+	local row = math.floor((self.Index - 1) / 3)
 
-	local sectionFrame = Instance.new("Frame")
-	sectionFrame.Name = "Section_" .. data.Name
-	sectionFrame.BackgroundColor3 = scheme.SectionBackground
-	sectionFrame.BorderSizePixel = 0
-	sectionFrame.Size = UDim2.new(1, -16, 0, 0)
-	sectionFrame.AutomaticSize = Enum.AutomaticSize.Y
-	sectionFrame.Parent = self.Tab.Container
+	local section = U:Create("Frame", {
+		Name = data.Name,
+		Position = UDim2.new(SECTION_X_OFFSET + col * SECTION_X_STEP, 0, SECTION_Y_OFFSET + row * SECTION_Y_STEP, 0),
+		Size = UDim2.new(0, T.SectionWidth, 0, T.SectionHeight),
+		BackgroundColor3 = scheme.SectionBg,
+		BackgroundTransparency = scheme.SectionBgTransparency,
+		BorderSizePixel = 0,
+		ClipsDescendants = false,
+		ZIndex = 1,
+		Parent = self.Tab.Container,
+	})
 
-	self.Utility:CreateCorner(sectionFrame)
-	self.Utility:CreateStroke(sectionFrame, scheme.ElementBorder, 1)
+	U:CreateStroke(section, scheme.stroke, 1)
 
-	local titleLabel = Instance.new("TextLabel")
-	titleLabel.Name = "Title"
-	titleLabel.BackgroundTransparency = 1
-	titleLabel.BorderSizePixel = 0
-	titleLabel.Font = self.Theme.Font
-	titleLabel.Text = data.Name
-	titleLabel.TextColor3 = scheme.SectionTitle
-	titleLabel.TextSize = self.Theme.TextSize + 1
-	titleLabel.TextXAlignment = Enum.TextXAlignment.Left
-	titleLabel.Size = UDim2.new(1, -20, 0, 24)
-	titleLabel.Position = UDim2.new(0, 10, 0, 8)
-	titleLabel.Parent = sectionFrame
+	-- Section header
+	local headerLabel = U:Create("TextLabel", {
+		Name = "TextLabel",
+		Position = UDim2.new(0, 0, 0, 0),
+		Size = UDim2.new(0, T.SectionWidth, 0, 23),
+		BackgroundColor3 = scheme.SectionBg,
+		BackgroundTransparency = 0.9599999785423279,
+		BorderSizePixel = 0,
+		Text = data.Name,
+		TextColor3 = scheme.text,
+		TextTransparency = 0,
+		TextSize = T.TextSizeSection,
+		FontFace = T.Font,
+		TextXAlignment = Enum.TextXAlignment.Center,
+		TextYAlignment = Enum.TextYAlignment.Center,
+		RichText = false,
+		ZIndex = 1,
+		Parent = section,
+	})
 
-	local elementContainer = Instance.new("Frame")
-	elementContainer.Name = "Elements"
-	elementContainer.BackgroundTransparency = 1
-	elementContainer.BorderSizePixel = 0
-	elementContainer.Size = UDim2.new(1, -20, 0, 0)
-	elementContainer.Position = UDim2.new(0, 10, 0, 36)
-	elementContainer.AutomaticSize = Enum.AutomaticSize.Y
-	elementContainer.Parent = sectionFrame
+	U:CreateStroke(headerLabel, scheme.stroke, 1, Enum.BorderStrokePosition.Outer)
 
-	local elementList = Instance.new("UIListLayout")
-	elementList.Padding = UDim.new(0, 6)
-	elementList.FillDirection = Enum.FillDirection.Vertical
-	elementList.HorizontalAlignment = Enum.HorizontalAlignment.Left
-	elementList.SortOrder = Enum.SortOrder.LayoutOrder
-	elementList.Parent = elementContainer
+	-- Buttons container (element holder)
+	local buttonsContainer = U:Create("Frame", {
+		Name = "Buttons",
+		Position = UDim2.new(-0.000690646702, 0, 0.052873563, 0),
+		Size = UDim2.new(0, T.SectionWidth, 0, 412),
+		BackgroundTransparency = 1,
+		BorderSizePixel = 0,
+		ClipsDescendants = false,
+		ZIndex = 1,
+		Parent = section,
+	})
 
-	self.Frame = sectionFrame
-	self.ElementContainer = elementContainer
-	self.TitleLabel = titleLabel
+	local scrollingFrame = U:CreateScrollingFrame(buttonsContainer)
+
+	local layout = U:CreateListLayout(scrollingFrame, UDim.new(0, 4))
+	layout.HorizontalAlignment = Enum.HorizontalAlignment.Left
+
+	local pad = Instance.new("UIPadding")
+	pad.PaddingTop = UDim.new(0, 4)
+	pad.PaddingBottom = UDim.new(0, 4)
+	pad.PaddingLeft = UDim.new(0, 4)
+	pad.PaddingRight = UDim.new(0, 4)
+	pad.Parent = scrollingFrame
+
+	self.Frame = section
+	self.HeaderLabel = headerLabel
+	self.ElementContainer = scrollingFrame
 
 	return self
 end

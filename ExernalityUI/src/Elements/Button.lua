@@ -18,65 +18,61 @@ function Button:Create(data)
 	data.Description = data.Description or ""
 
 	local scheme = self.Theme:GetScheme()
+	local T = self.Theme
+	local U = self.Utility
 
-	local buttonFrame = Instance.new("Frame")
-	buttonFrame.Name = "Button_" .. data.Name
-	buttonFrame.BackgroundColor3 = scheme.ElementBackground
-	buttonFrame.BorderSizePixel = 0
-	buttonFrame.Size = UDim2.new(1, 0, 0, 36)
-	buttonFrame.Parent = self.Section.ElementContainer
+	local btnFrame = U:Create("Frame", {
+		Name = "Button_" .. data.Name,
+		BackgroundColor3 = scheme.ElementBg,
+		BackgroundTransparency = scheme.ElementBgTransparency,
+		BorderSizePixel = 0,
+		Size = UDim2.new(1, -8, 0, 32),
+		Parent = self.Section.ElementContainer,
+	})
 
-	self.Utility:CreateCorner(buttonFrame)
+	U:CreateCorner(btnFrame)
 
-	local button = Instance.new("TextButton")
-	button.Name = "Button"
-	button.BackgroundColor3 = scheme.Accent
-	button.BorderSizePixel = 0
-	button.Font = self.Theme.Font
-	button.Text = data.Name or "Button"
-	button.TextColor3 = Color3.fromRGB(255, 255, 255)
-	button.TextSize = self.Theme.TextSize
-	button.Size = UDim2.new(0, 0, 0, 28)
-	button.Position = UDim2.new(1, -8, 0.5, -14)
-	button.AutomaticSize = Enum.AutomaticSize.X
-	button.Parent = buttonFrame
+	local nameLabel = U:Create("TextLabel", {
+		Name = "Name",
+		BackgroundTransparency = 1,
+		BorderSizePixel = 0,
+		FontFace = T.Font,
+		Text = data.Name,
+		TextColor3 = scheme.text,
+		TextSize = T.TextSize - 1,
+		TextXAlignment = Enum.TextXAlignment.Left,
+		Size = UDim2.new(0.6, -4, 1, 0),
+		Position = UDim2.new(0, 6, 0, 0),
+		Parent = btnFrame,
+	})
 
-	self.Utility:CreateCorner(button)
-	self.Utility:CreateStroke(button, scheme.AccentDim, 1)
+	local btn = U:Create("TextButton", {
+		Name = "Button",
+		BackgroundColor3 = scheme.Accent,
+		BorderSizePixel = 0,
+		FontFace = T.Font,
+		Text = "Activate",
+		TextColor3 = Color3.fromRGB(255, 255, 255),
+		TextSize = T.TextSize - 2,
+		Size = UDim2.new(0, 0, 0, 24),
+		Position = UDim2.new(1, -6, 0.5, -12),
+		AutomaticSize = Enum.AutomaticSize.X,
+		Parent = btnFrame,
+	})
 
-	local descriptionLabel
-	if data.Description and data.Description ~= "" then
-		descriptionLabel = Instance.new("TextLabel")
-		descriptionLabel.Name = "Description"
-		descriptionLabel.BackgroundTransparency = 1
-		descriptionLabel.BorderSizePixel = 0
-		descriptionLabel.Font = self.Theme.Font
-		descriptionLabel.Text = data.Description
-		descriptionLabel.TextColor3 = scheme.ElementTextSecondary
-		descriptionLabel.TextSize = self.Theme.TextSize - 2
-		descriptionLabel.TextXAlignment = Enum.TextXAlignment.Left
-		descriptionLabel.TextWrapped = true
-		descriptionLabel.Size = UDim2.new(1, -140, 0, 0)
-		descriptionLabel.AutomaticSize = Enum.AutomaticSize.Y
-		descriptionLabel.Position = UDim2.new(0, 0, 0, 0)
-		descriptionLabel.Parent = buttonFrame
-	end
+	U:CreateCorner(btn)
 
-	button.MouseButton1Click:Connect(function()
-		data.Callback()
+	btn.MouseButton1Click:Connect(data.Callback)
+	btn.MouseEnter:Connect(function()
+		U:Tween(btn, {BackgroundColor3 = scheme.AccentHover}, 0.15)
+	end)
+	btn.MouseLeave:Connect(function()
+		U:Tween(btn, {BackgroundColor3 = scheme.Accent}, 0.15)
 	end)
 
-	button.MouseEnter:Connect(function()
-		self.Utility:Tween(button, {BackgroundColor3 = scheme.AccentHover}, 0.15)
-	end)
-
-	button.MouseLeave:Connect(function()
-		self.Utility:Tween(button, {BackgroundColor3 = scheme.Accent}, 0.15)
-	end)
-
-	self.Frame = buttonFrame
-	self.Button = button
-	self.DescriptionLabel = descriptionLabel
+	self.Frame = btnFrame
+	self.Button = btn
+	self.NameLabel = nameLabel
 
 	return self
 end

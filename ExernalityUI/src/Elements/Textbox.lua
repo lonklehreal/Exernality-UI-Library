@@ -8,7 +8,6 @@ function Textbox.new(theme, utility, section)
 	self.Section = section
 	self.Frame = nil
 	self.Callback = nil
-	self.Focused = false
 	return self
 end
 
@@ -21,51 +20,57 @@ function Textbox:Create(data)
 	data.ClearTextOnFocus = data.ClearTextOnFocus or false
 
 	local scheme = self.Theme:GetScheme()
+	local T = self.Theme
+	local U = self.Utility
 
-	local textboxFrame = Instance.new("Frame")
-	textboxFrame.Name = "Textbox_" .. data.Name
-	textboxFrame.BackgroundColor3 = scheme.ElementBackground
-	textboxFrame.BorderSizePixel = 0
-	textboxFrame.Size = UDim2.new(1, 0, 0, 36)
-	textboxFrame.Parent = self.Section.ElementContainer
+	local tbFrame = U:Create("Frame", {
+		Name = "Textbox_" .. data.Name,
+		BackgroundColor3 = scheme.ElementBg,
+		BackgroundTransparency = scheme.ElementBgTransparency,
+		BorderSizePixel = 0,
+		Size = UDim2.new(1, -8, 0, 32),
+		Parent = self.Section.ElementContainer,
+	})
 
-	self.Utility:CreateCorner(textboxFrame)
+	U:CreateCorner(tbFrame)
 
-	local nameLabel = Instance.new("TextLabel")
-	nameLabel.Name = "Name"
-	nameLabel.BackgroundTransparency = 1
-	nameLabel.BorderSizePixel = 0
-	nameLabel.Font = self.Theme.Font
-	nameLabel.Text = data.Name or "Textbox"
-	nameLabel.TextColor3 = scheme.ElementText
-	nameLabel.TextSize = self.Theme.TextSize
-	nameLabel.TextXAlignment = Enum.TextXAlignment.Left
-	nameLabel.Size = UDim2.new(0.35, -10, 1, 0)
-	nameLabel.Position = UDim2.new(0, 10, 0, 0)
-	nameLabel.Parent = textboxFrame
+	local nameLabel = U:Create("TextLabel", {
+		Name = "Name",
+		BackgroundTransparency = 1,
+		BorderSizePixel = 0,
+		FontFace = T.Font,
+		Text = data.Name,
+		TextColor3 = scheme.text,
+		TextSize = T.TextSize - 2,
+		TextXAlignment = Enum.TextXAlignment.Left,
+		Size = UDim2.new(0.35, -4, 1, 0),
+		Position = UDim2.new(0, 6, 0, 0),
+		Parent = tbFrame,
+	})
 
-	local inputBox = Instance.new("TextBox")
-	inputBox.Name = "Input"
-	inputBox.BackgroundColor3 = scheme.InputBackground
-	inputBox.BorderSizePixel = 0
-	inputBox.Font = self.Theme.Font
-	inputBox.Text = data.Default or ""
-	inputBox.PlaceholderText = data.Placeholder or "Enter text..."
-	inputBox.PlaceholderColor3 = scheme.PlaceholderText
-	inputBox.TextColor3 = scheme.ElementText
-	inputBox.TextSize = self.Theme.TextSize - 1
-	inputBox.Size = UDim2.new(0.6, -20, 0, 26)
-	inputBox.Position = UDim2.new(0.35, 0, 0.5, -13)
-	inputBox.ClearTextOnFocus = data.ClearTextOnFocus
-	inputBox.Parent = textboxFrame
+	local inputBox = U:Create("TextBox", {
+		Name = "Input",
+		BackgroundColor3 = scheme.bg,
+		BorderSizePixel = 0,
+		FontFace = T.Font,
+		Text = data.Default,
+		PlaceholderText = data.Placeholder,
+		PlaceholderColor3 = scheme.PlaceholderText,
+		TextColor3 = scheme.text,
+		TextSize = T.TextSize - 2,
+		Size = UDim2.new(0.6, -8, 0, 24),
+		Position = UDim2.new(0.35, 0, 0.5, -12),
+		ClearTextOnFocus = data.ClearTextOnFocus,
+		Parent = tbFrame,
+	})
 
-	self.Utility:CreateCorner(inputBox)
+	U:CreateCorner(inputBox)
 
-	inputBox.FocusLost:Connect(function(enterPressed)
-		self.Callback(inputBox.Text)
+	inputBox.FocusLost:Connect(function()
+		data.Callback(inputBox.Text)
 	end)
 
-	self.Frame = textboxFrame
+	self.Frame = tbFrame
 	self.NameLabel = nameLabel
 	self.InputBox = inputBox
 

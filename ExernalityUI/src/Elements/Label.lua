@@ -17,28 +17,34 @@ function Label:Create(data)
 	data.TextSize = data.TextSize or nil
 
 	local scheme = self.Theme:GetScheme()
+	local T = self.Theme
+	local U = self.Utility
 
-	local labelFrame = Instance.new("Frame")
-	labelFrame.Name = "Label"
-	labelFrame.BackgroundColor3 = scheme.ElementBackground
-	labelFrame.BorderSizePixel = 0
-	labelFrame.Size = UDim2.new(1, 0, 0, 28)
-	labelFrame.Parent = self.Section.ElementContainer
+	local labelFrame = U:Create("Frame", {
+		Name = "Label",
+		BackgroundColor3 = scheme.ElementBg,
+		BackgroundTransparency = scheme.ElementBgTransparency,
+		BorderSizePixel = 0,
+		Size = UDim2.new(1, -8, 0, 24),
+		Parent = self.Section.ElementContainer,
+	})
 
-	self.Utility:CreateCorner(labelFrame)
+	U:CreateCorner(labelFrame)
 
-	local textLabel = Instance.new("TextLabel")
-	textLabel.Name = "Text"
-	textLabel.BackgroundTransparency = 1
-	textLabel.BorderSizePixel = 0
-	textLabel.Font = self.Theme.Font
-	textLabel.Text = data.Text or "Label"
-	textLabel.TextColor3 = data.Color or scheme.ElementTextSecondary
-	textLabel.TextSize = data.TextSize or self.Theme.TextSize - 1
-	textLabel.TextXAlignment = Enum.TextXAlignment.Left
-	textLabel.Size = UDim2.new(1, -20, 1, 0)
-	textLabel.Position = UDim2.new(0, 10, 0, 0)
-	textLabel.Parent = labelFrame
+	local textLabel = U:Create("TextLabel", {
+		Name = "Text",
+		BackgroundTransparency = 1,
+		BorderSizePixel = 0,
+		FontFace = T.Font,
+		Text = data.Text,
+		TextColor3 = data.Color or scheme.textDim,
+		TextSize = data.TextSize or T.TextSize - 2,
+		TextXAlignment = Enum.TextXAlignment.Left,
+		RichText = true,
+		Size = UDim2.new(1, -12, 1, 0),
+		Position = UDim2.new(0, 6, 0, 0),
+		Parent = labelFrame,
+	})
 
 	self.Frame = labelFrame
 	self.TextLabel = textLabel
