@@ -190,7 +190,9 @@ function Window:CreateTab(data)
 	tab.SetActive = function(self, active)
 		self.Active = active
 		if self.Container then self.Container.Visible = active end
-		if self.Icon then self.Icon.ImageColor3 = active and scheme.text or scheme.textDim end
+		local clr = active and scheme.text or scheme.textDim
+		if self.Icon then self.Icon.ImageColor3 = clr end
+		if self.NameLabel then self.NameLabel.TextColor3 = clr end
 	end
 	tab.CreateSection = function(self, data)
 		data = data or {}; data.Name = data.Name or "Section"

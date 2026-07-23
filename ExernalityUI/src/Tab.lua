@@ -64,9 +64,9 @@ function Tab:Create(data)
 			BorderSizePixel = 0,
 			Image = data.Icon,
 			ImageColor3 = scheme.text,
-			ScaleType = Enum.ScaleType.Stretch,
-			ZIndex = 2,
-			Parent = btn,
+		ScaleType = Enum.ScaleType.Fit,
+		ZIndex = 2,
+		Parent = btn,
 		})
 	end
 
@@ -117,8 +117,12 @@ function Tab:SetActive(active)
 	if self.Container then
 		self.Container.Visible = active
 	end
+	local clr = active and self.Theme:GetScheme().text or self.Theme:GetScheme().textDim
 	if self.Icon then
-		self.Icon.ImageColor3 = active and self.Theme:GetScheme().text or self.Theme:GetScheme().textDim
+		self.Icon.ImageColor3 = clr
+	end
+	if self.NameLabel then
+		self.NameLabel.TextColor3 = clr
 	end
 end
 
