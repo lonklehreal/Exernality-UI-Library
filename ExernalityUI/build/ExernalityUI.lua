@@ -65,7 +65,6 @@ function Utility:MakeDraggable(frame, dragHandle)
 	dragHandle.InputBegan:Connect(function(input)
 		if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
 			dragging = true; dragStart = input.Position; startPos = frame.Position
-			input.Changed:Connect(function() if input.UserInputState == Enum.UserInputState.End then dragging = false end end)
 		end
 	end)
 	local ic = UserInputService.InputChanged:Connect(function(input)
@@ -179,7 +178,7 @@ function Window:CreateTab(data)
 	local scheme = self.Theme:GetScheme(); local T = self.Theme; local U = self.Utility
 	local tabIndex = #self.Tabs + 1
 	local strokePos = tabIndex % 2 == 1 and Enum.BorderStrokePosition.Inner or Enum.BorderStrokePosition.Outer
-	local btn = U:Create("ImageButton", {Name = data.Name, Position = UDim2.new(0, 0, 0, (tabIndex - 1) * 39), Size = UDim2.new(0, T.SidebarWidth, 0, 39), BackgroundColor3 = scheme.bg, BorderSizePixel = 0, Image = data.Icon, ImageColor3 = scheme.text, ScaleType = Enum.ScaleType.NoScale, ClipsDescendants = false, Parent = self.TabButtons})
+	local btn = U:Create("ImageButton", {Name = data.Name, Position = UDim2.new(0, 0, 0, (tabIndex - 1) * 39), Size = UDim2.new(0, T.SidebarWidth, 0, 39), BackgroundColor3 = scheme.bg, BorderSizePixel = 0, Image = data.Icon, ImageColor3 = scheme.text, ClipsDescendants = false, Parent = self.TabButtons})
 	U:CreateStroke(btn, scheme.stroke, 1, strokePos)
 	local icon
 	if data.Icon and data.Icon ~= "" then

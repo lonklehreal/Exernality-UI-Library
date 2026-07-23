@@ -11,11 +11,6 @@ function Utility:MakeDraggable(frame, dragHandle)
 			dragging = true
 			dragStart = input.Position
 			startPos = frame.Position
-			input.Changed:Connect(function()
-				if input.UserInputState == Enum.UserInputState.End then
-					dragging = false
-				end
-			end)
 		end
 	end)
 	local inputConnection = UserInputService.InputChanged:Connect(function(input)

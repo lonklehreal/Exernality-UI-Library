@@ -48,7 +48,6 @@ function Tab:Create(data)
 		BorderSizePixel = 0,
 		Image = data.Icon,
 		ImageColor3 = scheme.text,
-		ScaleType = Enum.ScaleType.NoScale,
 		ZIndex = 1,
 		Parent = self.Window.TabButtons,
 	})
