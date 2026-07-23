@@ -9,8 +9,6 @@ function Window.new(theme, utility, notification)
 	self.Utility = utility
 	self.Notification = notification
 	self.Tabs = {}
-	self.TabButtons = {}
-	self.TabFrames = {}
 	self.ActiveTab = nil
 	self.Destroyed = false
 	self.Visible = true
@@ -32,23 +30,32 @@ function Window:Create(data)
 	local gui = U:Create("ScreenGui", {
 		Name = "Exernality",
 		ResetOnSpawn = true,
-		IgnoreGuiInset = false,
 		ScreenInsets = Enum.ScreenInsets.CoreUISafeInsets,
 		ClipToDeviceSafeArea = true,
 		ZIndexBehavior = Enum.ZIndexBehavior.Sibling,
 		Parent = playerGui,
 	})
 
-	local outline = U:Create("Frame", {
-		Name = "ExernalityOutline",
+	-- Drag container: both outline and mainFrame live in here, dragged as one
+	local dragContainer = U:Create("Frame", {
+		Name = "DragContainer",
 		Position = UDim2.new(0.19056724, 0, 0.20240964, 0),
 		Size = UDim2.new(0, T.WindowWidth, 0, T.WindowHeight),
+		BackgroundTransparency = 1,
+		BorderSizePixel = 0,
+		Parent = gui,
+	})
+
+	local outline = U:Create("Frame", {
+		Name = "ExernalityOutline",
+		Position = UDim2.new(0, 0, 0, 0),
+		Size = UDim2.new(1, 0, 1, 0),
 		BackgroundTransparency = 1,
 		BackgroundColor3 = scheme.bg,
 		BorderSizePixel = 0,
 		ClipsDescendants = false,
 		ZIndex = 2,
-		Parent = gui,
+		Parent = dragContainer,
 	})
 
 	U:CreateStroke(outline, Color3.fromRGB(138, 138, 138), 1, Enum.BorderStrokePosition.Outer)
@@ -56,14 +63,14 @@ function Window:Create(data)
 
 	local mainFrame = U:Create("Frame", {
 		Name = "Exernality",
-		Position = UDim2.new(0.19056724, 0, 0.20240964, 0),
-		Size = UDim2.new(0, T.WindowWidth, 0, T.WindowHeight),
+		Position = UDim2.new(0, 0, 0, 0),
+		Size = UDim2.new(1, 0, 1, 0),
 		BackgroundColor3 = scheme.bg,
 		BackgroundTransparency = 0,
 		BorderSizePixel = 0,
-		ClipsDescendants = false,
+		ClipsDescendants = true,
 		ZIndex = 1,
-		Parent = gui,
+		Parent = dragContainer,
 	})
 
 	U:CreateShadow(mainFrame, 0.06, Color3.fromRGB(0, 0, 0), 25)
@@ -79,7 +86,6 @@ function Window:Create(data)
 		BorderSizePixel = 0,
 		Image = data.Logo or "rbxassetid://94904426200943",
 		ImageColor3 = scheme.white,
-		ImageTransparency = 0,
 		ScaleType = Enum.ScaleType.Stretch,
 		ZIndex = 1,
 		Parent = mainFrame,
@@ -91,11 +97,11 @@ function Window:Create(data)
 	local lineH = U:Create("Frame", {
 		Name = "Line",
 		Position = UDim2.new(0, 0, 0, 0),
-		Size = UDim2.new(0, T.WindowWidth, 0, T.TopbarHeight),
+		Size = UDim2.new(1, 0, 0, T.TopbarHeight),
 		BackgroundTransparency = 1,
 		BackgroundColor3 = scheme.white,
 		BorderSizePixel = 0,
-		ClipsDescendants = false,
+		ClipsDescendants = true,
 		ZIndex = 15,
 		Parent = mainFrame,
 	})
@@ -120,11 +126,11 @@ function Window:Create(data)
 		BorderSizePixel = 0,
 		Text = data.Name,
 		TextColor3 = scheme.text,
-		TextTransparency = 0,
 		TextSize = T.TextSizeTitle,
 		FontFace = T.Font,
 		TextXAlignment = Enum.TextXAlignment.Left,
 		TextYAlignment = Enum.TextYAlignment.Center,
+		TextTruncate = Enum.TextTruncate.AtEnd,
 		RichText = false,
 		ZIndex = 1,
 		Parent = mainFrame,
@@ -140,11 +146,11 @@ function Window:Create(data)
 		BorderSizePixel = 0,
 		Text = data.Version or "v1.0",
 		TextColor3 = scheme.textDim,
-		TextTransparency = 0,
 		TextSize = T.TextSizeTitle,
 		FontFace = T.Font,
 		TextXAlignment = Enum.TextXAlignment.Left,
 		TextYAlignment = Enum.TextYAlignment.Center,
+		TextTruncate = Enum.TextTruncate.AtEnd,
 		RichText = false,
 		ZIndex = 1,
 		Parent = mainFrame,
@@ -192,12 +198,13 @@ function Window:Create(data)
 		Size = UDim2.new(0, T.ContentWidth, 0, T.ContentHeight),
 		BackgroundTransparency = 1,
 		BorderSizePixel = 0,
-		ClipsDescendants = false,
+		ClipsDescendants = true,
 		ZIndex = 1,
 		Parent = mainFrame,
 	})
 
 	self.Gui = gui
+	self.DragContainer = dragContainer
 	self.Outline = outline
 	self.Main = mainFrame
 	self.Logo = logo
@@ -207,8 +214,9 @@ function Window:Create(data)
 	self.TabsFrame = tabsFrame
 	self.TitleLabel = titleLabel
 	self.VersionLabel = versionLabel
+	self.ContentArea = tabsFrame
 
-	U:MakeDraggable(mainFrame, lineH)
+	U:MakeDraggable(dragContainer, lineH)
 
 	return self
 end
@@ -251,14 +259,12 @@ end
 
 function Window:Toggle()
 	self.Visible = not self.Visible
-	self.Main.Visible = self.Visible
-	self.Outline.Visible = self.Visible
+	self.DragContainer.Visible = self.Visible
 end
 
 function Window:SetVisible(visible)
 	self.Visible = visible
-	self.Main.Visible = visible
-	self.Outline.Visible = visible
+	self.DragContainer.Visible = visible
 end
 
 return Window
