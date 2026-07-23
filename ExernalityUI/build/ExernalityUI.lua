@@ -178,12 +178,14 @@ function Window:CreateTab(data)
 	local scheme = self.Theme:GetScheme(); local T = self.Theme; local U = self.Utility
 	local tabIndex = #self.Tabs + 1
 	local strokePos = tabIndex % 2 == 1 and Enum.BorderStrokePosition.Inner or Enum.BorderStrokePosition.Outer
-	local btn = U:Create("Frame", {Name = data.Name, Position = UDim2.new(0, 0, 0, (tabIndex - 1) * 39), Size = UDim2.new(0, T.SidebarWidth, 0, 39), BackgroundColor3 = scheme.bg, BorderSizePixel = 0, ClipsDescendants = false, Parent = self.TabButtons})
+	local btn = U:Create("ImageButton", {Name = data.Name, Position = UDim2.new(0, 0, 0, (tabIndex - 1) * 39), Size = UDim2.new(0, T.SidebarWidth, 0, 39), BackgroundColor3 = scheme.bg, BorderSizePixel = 0, Image = data.Icon, ImageColor3 = scheme.text, ScaleType = Enum.ScaleType.NoScale, ClipsDescendants = false, Parent = self.TabButtons})
 	U:CreateStroke(btn, scheme.stroke, 1, strokePos)
-	local icon = U:Create("ImageLabel", {Name = "ImageLabel", Position = UDim2.new(0.0738255009, 0, 0.179487184, 0), Size = UDim2.new(0, 25, 0, 25), BackgroundColor3 = scheme.bg, BackgroundTransparency = 0, BorderSizePixel = 0, Image = data.Icon, ImageColor3 = scheme.text, ScaleType = Enum.ScaleType.Stretch, Parent = btn})
-	local nml = U:Create("TextLabel", {Name = "Exernality", Position = UDim2.new(0.341167688, 0, -0.00197660015, 0), Size = UDim2.new(0, 97, 0, 39), BackgroundColor3 = scheme.bg, BackgroundTransparency = 1, BorderSizePixel = 0, Text = data.Name, TextColor3 = scheme.text, TextSize = T.TextSizeTitle, FontFace = T.Font, TextXAlignment = Enum.TextXAlignment.Left, TextYAlignment = Enum.TextYAlignment.Center, Parent = btn})
+	local icon
+	if data.Icon and data.Icon ~= "" then
+		icon = U:Create("ImageLabel", {Name = "ImageLabel", Position = UDim2.new(0.0738255009, 0, 0.179487184, 0), Size = UDim2.new(0, 25, 0, 25), BackgroundTransparency = 1, BorderSizePixel = 0, Image = data.Icon, ImageColor3 = scheme.text, ScaleType = Enum.ScaleType.Stretch, ZIndex = 2, Parent = btn})
+	end
+	local nml = U:Create("TextLabel", {Name = "Exernality", Position = UDim2.new(0.341167688, 0, -0.00197660015, 0), Size = UDim2.new(0, 97, 0, 39), BackgroundTransparency = 1, BorderSizePixel = 0, Text = data.Name, TextColor3 = scheme.text, TextSize = T.TextSizeTitle, FontFace = T.Font, TextXAlignment = Enum.TextXAlignment.Left, TextYAlignment = Enum.TextYAlignment.Center, ZIndex = 2, Parent = btn})
 	local tabFrame = U:Create("Frame", {Name = data.Name, Position = UDim2.new(0, 0, 0, 0), Size = UDim2.new(0, T.ContentWidth, 0, T.ContentHeight), BackgroundTransparency = 1, BorderSizePixel = 0, ClipsDescendants = false, Visible = false, Parent = self.TabsFrame})
-	local inputObj = Instance.new("TextButton"); inputObj.Name = "Input"; inputObj.BackgroundTransparency = 1; inputObj.BorderSizePixel = 0; inputObj.Size = UDim2.new(1, 0, 1, 0); inputObj.Text = ""; inputObj.Parent = btn
 	local tab = {Button = btn, Icon = icon, NameLabel = nml, Container = tabFrame, Sections = {}, Active = false, Window = self, Theme = self.Theme, Utility = self.Utility}
 	tab.SetActive = function(self, active)
 		self.Active = active
@@ -210,7 +212,7 @@ function Window:CreateTab(data)
 		end
 		table.insert(self.Sections, s); return s
 	end
-	inputObj.MouseButton1Click:Connect(function() self:SelectTab(tab) end)
+	btn.MouseButton1Click:Connect(function() self:SelectTab(tab) end)
 	table.insert(self.Tabs, tab)
 	if not self.ActiveTab then self:SelectTab(tab) end
 	return tab
@@ -247,14 +249,13 @@ local function createToggle(section, data)
 	data = data or {}; data.Name = data.Name or "Toggle"; data.Callback = data.Callback or function() end; data.Default = data.Default or false
 	local scheme = section.Theme:GetScheme(); local T = section.Theme; local U = section.Utility
 	local value = data.Default
-	local f = U:Create("Frame", {Name = "Toggle_" .. data.Name, BackgroundColor3 = scheme.ElementBg, BackgroundTransparency = scheme.ElementBgTransparency, BorderSizePixel = 0, Size = UDim2.new(1, -8, 0, 32), Parent = section.ElementContainer})
+	local f = U:Create("TextButton", {Name = "Toggle_" .. data.Name, BackgroundColor3 = scheme.ElementBg, BackgroundTransparency = scheme.ElementBgTransparency, BorderSizePixel = 0, Size = UDim2.new(1, -8, 0, 32), FontFace = Enum.Font.SourceSans, Text = "", Parent = section.ElementContainer})
 	U:CreateCorner(f)
 	U:Create("TextLabel", {Name = "Name", BackgroundTransparency = 1, BorderSizePixel = 0, FontFace = T.Font, Text = data.Name, TextColor3 = scheme.text, TextSize = T.TextSize - 1, TextXAlignment = Enum.TextXAlignment.Left, Size = UDim2.new(0.6, -4, 1, 0), Position = UDim2.new(0, 6, 0, 0), Parent = f})
 	local bg = U:Create("Frame", {Name = "ToggleBg", BackgroundColor3 = scheme.stroke, BorderSizePixel = 0, Size = UDim2.new(0, 36, 0, 18), Position = UDim2.new(1, -42, 0.5, -9), Parent = f})
 	U:CreateCorner(bg, UDim.new(0, 9))
 	local circle = U:Create("Frame", {Name = "Circle", BackgroundColor3 = scheme.textDim, BorderSizePixel = 0, Size = UDim2.new(0, 14, 0, 14), Position = UDim2.new(0, 2, 0.5, -7), Parent = bg})
 	U:CreateCorner(circle, UDim.new(0, 7))
-	local inputObj = Instance.new("TextButton"); inputObj.BackgroundTransparency = 1; inputObj.BorderSizePixel = 0; inputObj.Size = UDim2.new(1, 0, 1, 0); inputObj.Text = ""; inputObj.Parent = f
 	local function update()
 		if value then
 			U:Tween(bg, {BackgroundColor3 = scheme.Accent}, 0.15); U:Tween(circle, {BackgroundColor3 = Color3.fromRGB(255, 255, 255), Position = UDim2.new(0, 20, 0.5, -7)}, 0.15)
@@ -262,7 +263,7 @@ local function createToggle(section, data)
 			U:Tween(bg, {BackgroundColor3 = scheme.stroke}, 0.15); U:Tween(circle, {BackgroundColor3 = scheme.textDim, Position = UDim2.new(0, 2, 0.5, -7)}, 0.15)
 		end
 	end
-	inputObj.MouseButton1Click:Connect(function() value = not value; update(); data.Callback(value) end)
+	f.MouseButton1Click:Connect(function() value = not value; update(); data.Callback(value) end)
 	update(); return f
 end
 local function createSlider(section, data)
@@ -295,12 +296,11 @@ local function createDropdown(section, data)
 	data = data or {}; data.Name = data.Name or "Dropdown"; data.Callback = data.Callback or function() end; data.Options = data.Options or {}; data.Default = data.Default or ""
 	local scheme = section.Theme:GetScheme(); local T = section.Theme; local U = section.Utility
 	local selected, open, dl = data.Default, false, nil
-	local f = U:Create("Frame", {Name = "Dropdown_" .. data.Name, BackgroundColor3 = scheme.ElementBg, BackgroundTransparency = scheme.ElementBgTransparency, BorderSizePixel = 0, Size = UDim2.new(1, -8, 0, 32), Parent = section.ElementContainer})
+	local f = U:Create("TextButton", {Name = "Dropdown_" .. data.Name, BackgroundColor3 = scheme.ElementBg, BackgroundTransparency = scheme.ElementBgTransparency, BorderSizePixel = 0, Size = UDim2.new(1, -8, 0, 32), FontFace = Enum.Font.SourceSans, Text = "", Parent = section.ElementContainer})
 	U:CreateCorner(f)
 	U:Create("TextLabel", {Name = "Name", BackgroundTransparency = 1, BorderSizePixel = 0, FontFace = T.Font, Text = data.Name, TextColor3 = scheme.text, TextSize = T.TextSize - 2, TextXAlignment = Enum.TextXAlignment.Left, Size = UDim2.new(0.5, -4, 1, 0), Position = UDim2.new(0, 6, 0, 0), Parent = f})
-	local vb = U:Create("TextButton", {Name = "Value", BackgroundColor3 = scheme.bg, BorderSizePixel = 0, FontFace = T.Font, Text = data.Default ~= "" and tostring(data.Default) or "Select...", TextColor3 = data.Default ~= "" and scheme.text or scheme.PlaceholderText, TextSize = T.TextSize - 2, Size = UDim2.new(0, 0, 0, 24), Position = UDim2.new(1, -6, 0.5, -12), AutomaticSize = Enum.AutomaticSize.X, Parent = f})
-	U:CreateCorner(vb)
-	vb.MouseButton1Click:Connect(function()
+	local vl = U:Create("TextLabel", {Name = "Value", BackgroundTransparency = 1, BorderSizePixel = 0, FontFace = T.Font, Text = data.Default ~= "" and tostring(data.Default) or "Select...", TextColor3 = data.Default ~= "" and scheme.text or scheme.PlaceholderText, TextSize = T.TextSize - 2, TextXAlignment = Enum.TextXAlignment.Right, Size = UDim2.new(0.5, -10, 1, 0), Position = UDim2.new(0.5, 0, 0, 0), Parent = f})
+	f.MouseButton1Click:Connect(function()
 		open = not open
 		if open then
 			dl = U:Create("Frame", {Name = "DropdownList", BackgroundColor3 = scheme.DropdownBg, BorderSizePixel = 0, Size = UDim2.new(0, f.AbsoluteSize.X - 8, 0, 0), AutomaticSize = Enum.AutomaticSize.Y, Position = UDim2.new(0, 4, 0, f.AbsoluteSize.Y + 1), ZIndex = 50, Parent = section.ElementContainer})
@@ -310,7 +310,7 @@ local function createDropdown(section, data)
 				local ob = U:Create("TextButton", {BackgroundTransparency = 0.8, BorderSizePixel = 0, FontFace = T.Font, Text = tostring(opt), TextColor3 = scheme.text, TextSize = T.TextSize - 2, Size = UDim2.new(1, 0, 0, 26), Parent = dl})
 				ob.MouseEnter:Connect(function() U:Tween(ob, {BackgroundTransparency = 0.6}, 0.1) end)
 				ob.MouseLeave:Connect(function() U:Tween(ob, {BackgroundTransparency = 0.8}, 0.1) end)
-				ob.MouseButton1Click:Connect(function() selected = opt; vb.Text = tostring(opt); vb.TextColor3 = scheme.text; if dl then dl:Destroy() dl = nil end; open = false; data.Callback(opt) end)
+				ob.MouseButton1Click:Connect(function() selected = opt; vl.Text = tostring(opt); vl.TextColor3 = scheme.text; if dl then dl:Destroy() dl = nil end; open = false; data.Callback(opt) end)
 			end
 		elseif dl then dl:Destroy(); dl = nil end
 	end)
@@ -353,13 +353,12 @@ local function createColorPicker(section, data)
 	data = data or {}; data.Name = data.Name or "ColorPicker"; data.Callback = data.Callback or function() end; data.Default = data.Default or Color3.fromRGB(255, 255, 255)
 	local scheme = section.Theme:GetScheme(); local T = section.Theme; local U = section.Utility
 	local colorVal, open, pc = data.Default, false, nil
-	local f = U:Create("Frame", {Name = "ColorPicker_" .. data.Name, BackgroundColor3 = scheme.ElementBg, BackgroundTransparency = scheme.ElementBgTransparency, BorderSizePixel = 0, Size = UDim2.new(1, -8, 0, 32), Parent = section.ElementContainer})
+	local f = U:Create("TextButton", {Name = "ColorPicker_" .. data.Name, BackgroundColor3 = scheme.ElementBg, BackgroundTransparency = scheme.ElementBgTransparency, BorderSizePixel = 0, Size = UDim2.new(1, -8, 0, 32), FontFace = Enum.Font.SourceSans, Text = "", Parent = section.ElementContainer})
 	U:CreateCorner(f)
 	U:Create("TextLabel", {Name = "Name", BackgroundTransparency = 1, BorderSizePixel = 0, FontFace = T.Font, Text = data.Name, TextColor3 = scheme.text, TextSize = T.TextSize - 2, TextXAlignment = Enum.TextXAlignment.Left, Size = UDim2.new(0.5, -4, 1, 0), Position = UDim2.new(0, 6, 0, 0), Parent = f})
 	local preview = U:Create("Frame", {Name = "Preview", BackgroundColor3 = data.Default, BorderSizePixel = 0, Size = UDim2.new(0, 22, 0, 22), Position = UDim2.new(1, -28, 0.5, -11), Parent = f})
 	U:CreateCorner(preview, UDim.new(0, 4)); U:CreateStroke(preview, scheme.stroke, 1)
-	local inputObj = Instance.new("TextButton"); inputObj.BackgroundTransparency = 1; inputObj.BorderSizePixel = 0; inputObj.Size = UDim2.new(1, 0, 1, 0); inputObj.Text = ""; inputObj.Parent = f
-	inputObj.MouseButton1Click:Connect(function()
+	f.MouseButton1Click:Connect(function()
 		open = not open
 		if open then
 			pc = U:Create("Frame", {Name = "PickerContainer", BackgroundColor3 = scheme.DropdownBg, BorderSizePixel = 0, Size = UDim2.new(0, f.AbsoluteSize.X, 0, 140), Position = UDim2.new(0, 4, 0, f.AbsoluteSize.Y + 1), ZIndex = 50, Parent = section.ElementContainer})

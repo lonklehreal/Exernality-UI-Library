@@ -25,16 +25,18 @@ function ColorPicker:Create(data)
 	self.Value = data.Default
 	self.Callback = data.Callback
 
-	local cpFrame = U:Create("Frame", {
+	local cpBtn = U:Create("TextButton", {
 		Name = "ColorPicker_" .. data.Name,
 		BackgroundColor3 = scheme.ElementBg,
 		BackgroundTransparency = scheme.ElementBgTransparency,
 		BorderSizePixel = 0,
 		Size = UDim2.new(1, -8, 0, 32),
+		FontFace = Enum.Font.SourceSans,
+		Text = "",
 		Parent = self.Section.ElementContainer,
 	})
 
-	U:CreateCorner(cpFrame)
+	U:CreateCorner(cpBtn)
 
 	local nameLabel = U:Create("TextLabel", {
 		Name = "Name",
@@ -47,7 +49,7 @@ function ColorPicker:Create(data)
 		TextXAlignment = Enum.TextXAlignment.Left,
 		Size = UDim2.new(0.5, -4, 1, 0),
 		Position = UDim2.new(0, 6, 0, 0),
-		Parent = cpFrame,
+		Parent = cpBtn,
 	})
 
 	local colorPreview = U:Create("Frame", {
@@ -56,31 +58,23 @@ function ColorPicker:Create(data)
 		BorderSizePixel = 0,
 		Size = UDim2.new(0, 22, 0, 22),
 		Position = UDim2.new(1, -28, 0.5, -11),
-		Parent = cpFrame,
+		Parent = cpBtn,
 	})
 
 	U:CreateCorner(colorPreview, UDim.new(0, 4))
 	U:CreateStroke(colorPreview, scheme.stroke, 1)
 
-	local inputObj = Instance.new("TextButton")
-	inputObj.Name = "Input"
-	inputObj.BackgroundTransparency = 1
-	inputObj.BorderSizePixel = 0
-	inputObj.Size = UDim2.new(1, 0, 1, 0)
-	inputObj.Text = ""
-	inputObj.Parent = cpFrame
-
 	local pickerContainer
 
-	inputObj.MouseButton1Click:Connect(function()
+	cpBtn.MouseButton1Click:Connect(function()
 		self.Open = not self.Open
 		if self.Open then
 			pickerContainer = U:Create("Frame", {
 				Name = "PickerContainer",
 				BackgroundColor3 = scheme.DropdownBg,
 				BorderSizePixel = 0,
-				Size = UDim2.new(0, cpFrame.AbsoluteSize.X, 0, 140),
-				Position = UDim2.new(0, 4, 0, cpFrame.AbsoluteSize.Y + 1),
+				Size = UDim2.new(0, cpBtn.AbsoluteSize.X, 0, 140),
+				Position = UDim2.new(0, 0, 0, cpBtn.AbsoluteSize.Y + 1),
 				ZIndex = 50,
 				Parent = self.Section.ElementContainer,
 			})
@@ -127,7 +121,7 @@ function ColorPicker:Create(data)
 		end
 	end)
 
-	self.Frame = cpFrame
+	self.Frame = cpBtn
 	self.NameLabel = nameLabel
 	self.ColorPreview = colorPreview
 

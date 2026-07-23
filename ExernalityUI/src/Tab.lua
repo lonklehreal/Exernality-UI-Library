@@ -39,40 +39,42 @@ function Tab:Create(data)
 
 	local btnData = tabButtonData[(self.Index - 1) % #tabButtonData + 1]
 
-	local btn = U:Create("Frame", {
+	local btn = U:Create("ImageButton", {
 		Name = data.Name,
 		Position = UDim2.new(0, 0, 0, (self.Index - 1) * 39),
 		Size = UDim2.new(0, T.SidebarWidth, 0, 39),
 		BackgroundColor3 = scheme.bg,
 		BackgroundTransparency = 0,
 		BorderSizePixel = 0,
-		ClipsDescendants = false,
+		Image = data.Icon,
+		ImageColor3 = scheme.text,
+		ScaleType = Enum.ScaleType.NoScale,
 		ZIndex = 1,
 		Parent = self.Window.TabButtons,
 	})
 
 	U:CreateStroke(btn, scheme.stroke, 1, btnData.strokePosition)
 
-	local icon = U:Create("ImageLabel", {
-		Name = "ImageLabel",
-		Position = UDim2.new(0.0738255009, 0, 0.179487184, 0),
-		Size = UDim2.new(0, 25, 0, 25),
-		BackgroundColor3 = scheme.bg,
-		BackgroundTransparency = 0,
-		BorderSizePixel = 0,
-		Image = data.Icon,
-		ImageColor3 = scheme.text,
-		ImageTransparency = 0,
-		ScaleType = Enum.ScaleType.Stretch,
-		ZIndex = 1,
-		Parent = btn,
-	})
+	local iconImage
+	if data.Icon and data.Icon ~= "" then
+		iconImage = U:Create("ImageLabel", {
+			Name = "ImageLabel",
+			Position = UDim2.new(0.0738255009, 0, 0.179487184, 0),
+			Size = UDim2.new(0, 25, 0, 25),
+			BackgroundTransparency = 1,
+			BorderSizePixel = 0,
+			Image = data.Icon,
+			ImageColor3 = scheme.text,
+			ScaleType = Enum.ScaleType.Stretch,
+			ZIndex = 2,
+			Parent = btn,
+		})
+	end
 
 	local nameLabel = U:Create("TextLabel", {
 		Name = "Exernality",
 		Position = UDim2.new(0.341167688, 0, -0.00197660015, 0),
 		Size = UDim2.new(0, 97, 0, 39),
-		BackgroundColor3 = scheme.bg,
 		BackgroundTransparency = 1,
 		BorderSizePixel = 0,
 		Text = data.Name,
@@ -82,8 +84,7 @@ function Tab:Create(data)
 		FontFace = T.Font,
 		TextXAlignment = Enum.TextXAlignment.Left,
 		TextYAlignment = Enum.TextYAlignment.Center,
-		RichText = false,
-		ZIndex = 1,
+		ZIndex = 2,
 		Parent = btn,
 	})
 
@@ -100,24 +101,14 @@ function Tab:Create(data)
 		Parent = self.Window.TabsFrame,
 	})
 
-	-- Click handling
-	local inputObj = Instance.new("TextButton")
-	inputObj.Name = "Input"
-	inputObj.BackgroundTransparency = 1
-	inputObj.BorderSizePixel = 0
-	inputObj.Size = UDim2.new(1, 0, 1, 0)
-	inputObj.Text = ""
-	inputObj.Parent = btn
-
-	inputObj.MouseButton1Click:Connect(function()
+	btn.MouseButton1Click:Connect(function()
 		self.Window:SelectTab(self)
 	end)
 
 	self.Button = btn
-	self.Icon = icon
+	self.Icon = iconImage
 	self.NameLabel = nameLabel
 	self.Container = tabFrame
-	self.InputObj = inputObj
 
 	return self
 end

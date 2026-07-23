@@ -23,16 +23,18 @@ function Toggle:Create(data)
 	local U = self.Utility
 	self.Value = data.Default
 
-	local toggleFrame = U:Create("Frame", {
+	local toggleBtn = U:Create("TextButton", {
 		Name = "Toggle_" .. data.Name,
 		BackgroundColor3 = scheme.ElementBg,
 		BackgroundTransparency = scheme.ElementBgTransparency,
 		BorderSizePixel = 0,
 		Size = UDim2.new(1, -8, 0, 32),
+		FontFace = Enum.Font.SourceSans,
+		Text = "",
 		Parent = self.Section.ElementContainer,
 	})
 
-	U:CreateCorner(toggleFrame)
+	U:CreateCorner(toggleBtn)
 
 	local nameLabel = U:Create("TextLabel", {
 		Name = "Name",
@@ -45,7 +47,7 @@ function Toggle:Create(data)
 		TextXAlignment = Enum.TextXAlignment.Left,
 		Size = UDim2.new(0.6, -4, 1, 0),
 		Position = UDim2.new(0, 6, 0, 0),
-		Parent = toggleFrame,
+		Parent = toggleBtn,
 	})
 
 	local toggleBg = U:Create("Frame", {
@@ -54,7 +56,7 @@ function Toggle:Create(data)
 		BorderSizePixel = 0,
 		Size = UDim2.new(0, 36, 0, 18),
 		Position = UDim2.new(1, -42, 0.5, -9),
-		Parent = toggleFrame,
+		Parent = toggleBtn,
 	})
 
 	U:CreateCorner(toggleBg, UDim.new(0, 9))
@@ -70,25 +72,16 @@ function Toggle:Create(data)
 
 	U:CreateCorner(toggleCircle, UDim.new(0, 7))
 
-	local inputObj = Instance.new("TextButton")
-	inputObj.Name = "Input"
-	inputObj.BackgroundTransparency = 1
-	inputObj.BorderSizePixel = 0
-	inputObj.Size = UDim2.new(1, 0, 1, 0)
-	inputObj.Text = ""
-	inputObj.Parent = toggleFrame
-
-	inputObj.MouseButton1Click:Connect(function()
+	toggleBtn.MouseButton1Click:Connect(function()
 		self.Value = not self.Value
 		self:UpdateVisuals()
 		data.Callback(self.Value)
 	end)
 
-	self.Frame = toggleFrame
+	self.Frame = toggleBtn
 	self.ToggleBg = toggleBg
 	self.ToggleCircle = toggleCircle
 	self.NameLabel = nameLabel
-	self.InputObj = inputObj
 
 	self:UpdateVisuals()
 

@@ -29,16 +29,18 @@ function Dropdown:Create(data)
 	self.Selected = data.Default
 	self.Callback = data.Callback
 
-	local dropFrame = U:Create("Frame", {
+	local dropBtn = U:Create("TextButton", {
 		Name = "Dropdown_" .. data.Name,
 		BackgroundColor3 = scheme.ElementBg,
 		BackgroundTransparency = scheme.ElementBgTransparency,
 		BorderSizePixel = 0,
 		Size = UDim2.new(1, -8, 0, 32),
+		FontFace = Enum.Font.SourceSans,
+		Text = "",
 		Parent = self.Section.ElementContainer,
 	})
 
-	U:CreateCorner(dropFrame)
+	U:CreateCorner(dropBtn)
 
 	local nameLabel = U:Create("TextLabel", {
 		Name = "Name",
@@ -51,66 +53,60 @@ function Dropdown:Create(data)
 		TextXAlignment = Enum.TextXAlignment.Left,
 		Size = UDim2.new(0.5, -4, 1, 0),
 		Position = UDim2.new(0, 6, 0, 0),
-		Parent = dropFrame,
+		Parent = dropBtn,
 	})
 
-	local valueBtn = U:Create("TextButton", {
+	local valueLabel = U:Create("TextLabel", {
 		Name = "Value",
-		BackgroundColor3 = scheme.bg,
+		BackgroundTransparency = 1,
 		BorderSizePixel = 0,
 		FontFace = T.Font,
 		Text = data.Default ~= "" and tostring(data.Default) or "Select...",
 		TextColor3 = data.Default ~= "" and scheme.text or scheme.PlaceholderText,
 		TextSize = T.TextSize - 2,
-		Size = UDim2.new(0, 0, 0, 24),
-		Position = UDim2.new(1, -6, 0.5, -12),
-		AutomaticSize = Enum.AutomaticSize.X,
-		ClipsDescendants = false,
-		Parent = dropFrame,
+		TextXAlignment = Enum.TextXAlignment.Right,
+		Size = UDim2.new(0.5, -10, 1, 0),
+		Position = UDim2.new(0.5, 0, 0, 0),
+		Parent = dropBtn,
 	})
 
-	U:CreateCorner(valueBtn)
-
-	valueBtn.MouseButton1Click:Connect(function()
+	dropBtn.MouseButton1Click:Connect(function()
 		self.Open = not self.Open
 		if self.Open then
-			self:OpenDropdown(dropFrame, scheme, data)
+			self:OpenDropdown(dropBtn, scheme, data)
 		else
 			self:CloseDropdown()
 		end
 	end)
 
-	self.Frame = dropFrame
+	self.Frame = dropBtn
 	self.NameLabel = nameLabel
-	self.ValueBtn = valueBtn
+	self.ValueLabel = valueLabel
 
 	return self
 end
 
 function Dropdown:OpenDropdown(parentFrame, scheme, data)
-	if self.DropdownList then
-		self:CloseDropdown()
-		return
-	end
+	if self.DropdownList then self:CloseDropdown() return end
 
-	local listFrame = U:Create("Frame", {
+	local listFrame = self.Utility:Create("Frame", {
 		Name = "DropdownList",
 		BackgroundColor3 = scheme.DropdownBg,
 		BorderSizePixel = 0,
-		Size = UDim2.new(0, parentFrame.AbsoluteSize.X - 8, 0, 0),
+		Size = UDim2.new(0, parentFrame.AbsoluteSize.X, 0, 0),
 		AutomaticSize = Enum.AutomaticSize.Y,
-		Position = UDim2.new(0, 4, 0, parentFrame.AbsoluteSize.Y + 1),
+		Position = UDim2.new(0, 0, 0, parentFrame.AbsoluteSize.Y + 1),
 		ZIndex = 50,
 		Parent = self.Section.ElementContainer,
 	})
 
-	U:CreateCorner(listFrame)
-	U:CreateStroke(listFrame, scheme.stroke, 1)
+	self.Utility:CreateCorner(listFrame)
+	self.Utility:CreateStroke(listFrame, scheme.stroke, 1)
 
-	local layout = U:CreateListLayout(listFrame, UDim.new(0, 0))
+	local layout = self.Utility:CreateListLayout(listFrame, UDim.new(0, 0))
 
 	for _, option in ipairs(self.Options) do
-		local optBtn = U:Create("TextButton", {
+		local optBtn = self.Utility:Create("TextButton", {
 			BackgroundTransparency = 0.8,
 			BorderSizePixel = 0,
 			FontFace = self.Theme.Font,
@@ -122,17 +118,17 @@ function Dropdown:OpenDropdown(parentFrame, scheme, data)
 		})
 
 		optBtn.MouseEnter:Connect(function()
-			U:Tween(optBtn, {BackgroundTransparency = 0.6}, 0.1)
+			self.Utility:Tween(optBtn, {BackgroundTransparency = 0.6}, 0.1)
 		end)
 
 		optBtn.MouseLeave:Connect(function()
-			U:Tween(optBtn, {BackgroundTransparency = 0.8}, 0.1)
+			self.Utility:Tween(optBtn, {BackgroundTransparency = 0.8}, 0.1)
 		end)
 
 		optBtn.MouseButton1Click:Connect(function()
 			self.Selected = option
-			self.ValueBtn.Text = tostring(option)
-			self.ValueBtn.TextColor3 = scheme.text
+			self.ValueLabel.Text = tostring(option)
+			self.ValueLabel.TextColor3 = scheme.text
 			self:CloseDropdown()
 			data.Callback(option)
 		end)
