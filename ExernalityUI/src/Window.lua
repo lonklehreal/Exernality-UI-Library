@@ -68,7 +68,7 @@ function Window:Create(data)
 		BackgroundColor3 = scheme.bg,
 		BackgroundTransparency = 0,
 		BorderSizePixel = 0,
-		ClipsDescendants = true,
+		ClipsDescendants = false,
 		ZIndex = 1,
 		Parent = dragContainer,
 	})

@@ -68,7 +68,7 @@ function Utility:MakeDraggable(frame, dragHandle)
 			input.Changed:Connect(function() if input.UserInputState == Enum.UserInputState.End then dragging = false end end)
 		end
 	end)
-	local ic = dragHandle.InputChanged:Connect(function(input)
+	local ic = UserInputService.InputChanged:Connect(function(input)
 		if (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) and dragging then
 			local d = input.Position - dragStart; frame.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + d.X, startPos.Y.Scale, startPos.Y.Offset + d.Y)
 		end
@@ -156,7 +156,7 @@ function Window:Create(data)
 	local dragContainer = U:Create("Frame", {Name = "DragContainer", Position = UDim2.new(0.19056724, 0, 0.20240964, 0), Size = UDim2.new(0, T.WindowWidth, 0, T.WindowHeight), BackgroundTransparency = 1, BorderSizePixel = 0, Parent = gui})
 	local outline = U:Create("Frame", {Name = "ExernalityOutline", Position = UDim2.new(0, 0, 0, 0), Size = UDim2.new(1, 0, 1, 0), BackgroundTransparency = 1, BackgroundColor3 = scheme.bg, BorderSizePixel = 0, ClipsDescendants = false, ZIndex = 2, Parent = dragContainer})
 	U:CreateStroke(outline, Color3.fromRGB(138, 138, 138), 1, Enum.BorderStrokePosition.Outer); U:CreateCorner(outline)
-	local mainFrame = U:Create("Frame", {Name = "Exernality", Position = UDim2.new(0, 0, 0, 0), Size = UDim2.new(1, 0, 1, 0), BackgroundColor3 = scheme.bg, BackgroundTransparency = 0, BorderSizePixel = 0, ClipsDescendants = true, ZIndex = 1, Parent = dragContainer})
+	local mainFrame = U:Create("Frame", {Name = "Exernality", Position = UDim2.new(0, 0, 0, 0), Size = UDim2.new(1, 0, 1, 0), BackgroundColor3 = scheme.bg, BackgroundTransparency = 0, BorderSizePixel = 0, 	ClipsDescendants = false, ZIndex = 1, Parent = dragContainer})
 	U:CreateShadow(mainFrame, 0.06, Color3.fromRGB(0, 0, 0), 25); U:CreateCorner(mainFrame)
 	local logo = U:Create("ImageLabel", {Name = "ImageLabel", Position = UDim2.new(0.010309278, 0, 0.0118577071, 0), Size = UDim2.new(0, 27, 0, 27), BackgroundColor3 = scheme.white, BackgroundTransparency = 0, BorderSizePixel = 0, Image = data.Logo or "rbxassetid://94904426200943", ImageColor3 = scheme.white, ScaleType = Enum.ScaleType.Stretch, Parent = mainFrame})
 	U:CreateStroke(logo, scheme.strokeOuter, 1)
